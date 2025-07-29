@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações - Studio Transformese</title>
-    <link rel="stylesheet" href="css/style.css"> <link rel="stylesheet" href="css/configadmin.css"> </head>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/configadmin.css">
+</head>
 <body>
     <header class="dashboard-header admin-header">
         <div class="header-content">
-            <h1>Configurações Admin</h1>
+            <h1 id="adminHeaderTitle">Configurações Admin</h1> 
             <div class="header-actions">
                 <button class="btn-back" onclick="window.location.href='admin.html'">
                 Voltar
@@ -31,6 +33,9 @@
                 <form id="adminUserForm" class="add-form">
                     <input type="hidden" id="adminUserId">
                     <div class="form-group">
+                        <label for="adminUserName">Nome do Administrador</label> <input type="text" id="adminUserName" placeholder="Nome Completo" required>
+                    </div>
+                    <div class="form-group">
                         <label for="adminUserEmail">Email do Administrador</label>
                         <input type="email" id="adminUserEmail" placeholder="admin@email.com" required>
                     </div>
@@ -43,7 +48,7 @@
                 <div class="list-container">
                     <h3>Administradores Cadastrados</h3>
                     <ul id="adminUsersList" class="item-list">
-                        </ul>
+                    </ul>
                 </div>
             </div>
 
@@ -60,7 +65,7 @@
                 <div class="list-container">
                     <h3>Categorias Cadastradas</h3>
                     <ul id="productCategoriesList" class="item-list">
-                        </ul>
+                    </ul>
                 </div>
             </div>
 
@@ -85,11 +90,13 @@
                 <div class="list-container">
                     <h3>Serviços Cadastrados</h3>
                     <ul id="servicesList" class="item-list">
-                        </ul>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/script.js"></script> <script src="js/configadmin.js"></script> </body>
+    <script src="js/script.js"></script>
+    <script src="js/configadmin.js"></script>
+</body>
 </html>

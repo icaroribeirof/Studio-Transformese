@@ -47,10 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Administradores
     const adminUserForm = document.getElementById('adminUserForm');
     const adminUserIdInput = document.getElementById('adminUserId');
+    const adminUserNameInput = document.getElementById('adminUserName'); // NOVO: Campo de nome
     const adminUserEmailInput = document.getElementById('adminUserEmail');
     const adminUserPasswordInput = document.getElementById('adminUserPassword');
     const saveAdminUserBtn = document.getElementById('saveAdminUserBtn');
     const adminUsersList = document.getElementById('adminUsersList');
+    const adminHeaderTitle = document.getElementById('adminHeaderTitle'); // Para exibir o nome do admin no header
 
     // Categorias de Produtos
     const productCategoryForm = document.getElementById('productCategoryForm');
@@ -99,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             adminUsersList.innerHTML = admins.map(admin => `
                 <li>
                     <div class="item-info">
-                        <strong>${admin.email}</strong>
+                        <strong>${admin.name || admin.email}</strong> <span>Email: ${admin.email}</span>
                         <span>Senha: ******</span>
                     </div>
                     <div class="item-actions">
@@ -114,11 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
     adminUserForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const id = adminUserIdInput.value;
-        const email = adminUserEmailInput.value;
+        const name = adminUserNameInput.value.trim(); // NOVO: Pega o nome
+        const email = adminUserEmailInput.value.trim();
         const password = adminUserPasswordInput.value; // Em um app real, use hash de senha!
 
         if (password.length < 6) {
             alert('A senha deve ter no mínimo 6 caracteres.');
+            return;
+        }
+        if (!name) {
+            alert('O nome do administrador não pode ser vazio.');
             return;
         }
 
@@ -128,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Editando
             const index = admins.findIndex(a => a.id === id);
             if (index !== -1) {
-                admins[index] = { id, email, password };
+                admins[index] = { id, name, email, password, role: 'admin' }; // Salva o nome e garante a role
             }
         } else {
             // Adicionando novo
@@ -139,8 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const newAdmin = {
                 id: Date.now().toString(),
+                name, // NOVO: Salva o nome
                 email,
-                password
+                password,
+                role: 'admin' // Garante a role
             };
             admins.push(newAdmin);
         }
@@ -155,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminToEdit = admins.find(admin => admin.id === id);
         if (adminToEdit) {
             adminUserIdInput.value = adminToEdit.id;
+            adminUserNameInput.value = adminToEdit.name || ''; // NOVO: Preenche o campo de nome
             adminUserEmailInput.value = adminToEdit.email;
             adminUserPasswordInput.value = adminToEdit.password; // Em um app real, você não pré-preencheria a senha
             saveAdminUserBtn.textContent = 'Atualizar Administrador';
@@ -370,15 +380,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-
     // --- Inicialização da Página ---
     // Configura o admin padrão se não houver nenhum
     let adminUsers = getStoredData('adminUsers');
     if (adminUsers.length === 0) {
-        adminUsers = [{ id: 'admin-default', email: 'admin@tranca.com', password: 'admin123' }];
+        adminUsers = [{ id: 'admin-default', name: 'Administrador Padrão', email: 'admin@tranca.com', password: 'admin123', role: 'admin' }]; // Adicionado 'name'
         setStoredData('adminUsers', adminUsers);
     }
-     // Inicializa as categorias padrão se não houver nenhuma
+    // Inicializa as categorias padrão se não houver nenhuma
     let productCategories = getStoredData('productCategories');
     if (productCategories.length === 0) {
         productCategories = [
@@ -404,4 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProductCategories();
     renderServices(); // Renderiza a primeira aba
     // A primeira aba já estará ativa por padrão no HTML
+
+    // Exibe o nome do admin no cabeçalho da página de configurações
+    if (adminHeaderTitle && loggedInUser && loggedInUser.name) {
+        adminHeaderTitle.textContent = `Configurações Admin - ${loggedInUser.name}`;
+    } else if (adminHeaderTitle && loggedInUser && loggedInUser.email) {
+        // Fallback para email se o nome não estiver disponível (e.g., para admin@tranca.com)
+        adminHeaderTitle.textContent = `Configurações Admin - ${loggedInUser.email.split('@')[0]}`;
+    }
 });

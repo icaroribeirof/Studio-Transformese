@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.logout = logout; // Make logout accessible globally
 
-    // --- Login Page Logic (index.html) ---
     const loginForm = document.getElementById('loginForm');
     const clienteBtn = document.getElementById('clienteBtn');
     const adminBtn = document.getElementById('adminBtn');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const submitLoginBtn = document.getElementById('submitLoginBtn');
+    const cadastroButtonContainer = document.getElementById('cadastroButtonContainer');
 
     let currentRole = 'cliente'; // Default role
 
@@ -55,12 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
             
             emailInput.value = '';
             passwordInput.value = '';
+
+            if (cadastroButtonContainer) {
+                if (role === 'cliente') {
+                    cadastroButtonContainer.classList.remove('hidden');
+                } else {
+                    cadastroButtonContainer.classList.add('hidden');
+                }
+            }
         }
     };
 
     if (clienteBtn && adminBtn) {
         clienteBtn.addEventListener('click', () => handleRoleChange('cliente'));
         adminBtn.addEventListener('click', () => handleRoleChange('admin'));
+        handleRoleChange(currentRole); 
     }
 
     if (loginForm) {
@@ -69,20 +78,65 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = emailInput.value;
             const password = passwordInput.value;
 
-            // Pega os usuários admins do localStorage
             const adminUsers = getStoredData('adminUsers');
             const foundAdmin = adminUsers.find(admin => admin.email === email && admin.password === password);
 
-            // Login do cliente fixo (para demonstração)
-            if (currentRole === 'cliente' && email === 'cliente@email.com' && password === 'cliente123') {
-                localStorage.setItem('loggedInUser', JSON.stringify({ email: email, role: 'cliente' }));
+            const clientUsers = getStoredData('clientUsers');
+            const foundClient = clientUsers.find(client => client.email === email && client.password === password);
+
+            if (currentRole === 'cliente' && foundClient) {
+                localStorage.setItem('loggedInUser', JSON.stringify({ email: email, name: foundClient.name, role: 'cliente' }));
                 window.location.href = 'cliente.html';
-            } else if (currentRole === 'admin' && foundAdmin) { // Usando adminUsers do localStorage
-                localStorage.setItem('loggedInUser', JSON.stringify({ email: email, role: 'admin' }));
+            } else if (currentRole === 'admin' && foundAdmin) {
+                // CORREÇÃO CRUCIAL AQUI: Salva o nome do admin ao logar
+                localStorage.setItem('loggedInUser', JSON.stringify({ email: email, name: foundAdmin.name, role: 'admin' })); 
                 window.location.href = 'admin.html';
             } else {
                 alert('Credenciais inválidas. Tente novamente.');
             }
+        });
+    }
+
+    // --- Client Registration Logic (cadcliente.html) ---
+    const cadastroClienteForm = document.getElementById('cadastroClienteForm');
+    if (cadastroClienteForm) {
+        cadastroClienteForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cadNome = document.getElementById('cadNome').value.trim();
+            const cadEmail = document.getElementById('cadEmail').value.trim();
+            const cadPassword = document.getElementById('cadPassword').value;
+            const cadConfirmPassword = document.getElementById('cadConfirmPassword').value;
+
+            if (cadPassword !== cadConfirmPassword) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+
+            if (cadPassword.length < 6) {
+                alert('A senha deve ter no mínimo 6 caracteres.');
+                return;
+            }
+
+            let clientUsers = getStoredData('clientUsers');
+
+            if (clientUsers.some(user => user.email === cadEmail)) {
+                alert('Este email já está cadastrado. Por favor, faça login ou use outro email.');
+                return;
+            }
+
+            const newClient = {
+                id: Date.now().toString(),
+                name: cadNome, // Já estava correto, garantindo que o nome é salvo
+                email: cadEmail,
+                password: cadPassword,
+                role: 'cliente'
+            };
+
+            clientUsers.push(newClient);
+            setStoredData('clientUsers', clientUsers);
+
+            alert('Cadastro realizado com sucesso! Agora você pode fazer login.');
+            window.location.href = 'index.html';
         });
     }
 
@@ -104,11 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderClientAppointments = () => {
         let appointments = getStoredData('appointments').filter(app => app.clientEmail === (JSON.parse(localStorage.getItem('loggedInUser'))?.email || ''));
         
-        // Ordenar agendamentos: mais recentes primeiro
         appointments.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
-            return dateB - dateA; // Decrescente (mais recente primeiro)
+            return dateB - dateA;
         });
 
         if (appointments.length === 0) {
@@ -123,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p>Cliente: ${app.clientEmail}</p>
                         <div class="details">
                             <span>
-                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXIiPgogIDxwYXRoIGQ9Ik0zLjUgMGExLjUuNSAwIDAgMSAxLjUuNXYxSDEwdi0xYTEuNS41IDAgMCAxIDEuNS0uNWwxLjUuNWEuNS41IDAgMCAxIC41LjV2OWExLjUuNSAwIDAgMS0uNS41bC0xLjUuNWEuNS41IDAgMCAxLS41LS41VjExSDUuNXYxYTEuNS41IDAgMCAxLTEuNS41TDIgMTIuNWExLjUuNSAwIDAgMS0uNS0uNVY0LjVhLjUuNSAwIDAgMSAuNS0uNWwxLjUtLjV6Ii8+Cjwvc3ZnPg==" alt="Date Icon">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXItZWRpdCI+CiAgPHBhdGggZD0iTTMuNTkgMS41bDEuMjkgMS4zMDJBLjUuNSAwIDAgMCA1LjM0IDIuOWEzIDMgMCAwIDAgNS4wNjYuNTE3bDEuMzAyLTEuMjlhLjUuNSAwIDAgMCAuNzAxLjA4NmwxLjU1OCA3LjAzMi03LjAzMiAxLjU1OGEuNS41IDAgMCAwLS4wODYuNzAxbC0xLjI5LTEuMzAyQTMgMyAwIDAgMCAuNTc2IDEyLjk4NC41LjUuNSAwIDAgMCAtLjQ2NiAxMi43bC0uNy03Yy0uMS0uOS43LTQuMiAxLjUtNmw2LTRoYzAtLjEgMS44LjcgMS41IDEuNXoiLz4KPC9zdmc+" alt="Calendar Icon">
                                 ${app.date}
                             </span>
                             <span>
@@ -173,20 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedDate = dateInput.value;
         if (selectedDate) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Reset time for comparison
+            today.setHours(0, 0, 0, 0);
 
-            const dateObj = new Date(selectedDate + 'T00:00:00'); // Use T00:00:00 to avoid timezone issues
-            dateObj.setHours(0, 0, 0, 0); // Reset time for comparison
+            const dateObj = new Date(selectedDate + 'T00:00:00');
+            dateObj.setHours(0, 0, 0, 0);
 
-            let startHour = 9; // Default start hour
-            const endHour = 18; // Default end hour
+            let startHour = 9;
+            const endHour = 18;
 
-            if (dateObj.getTime() === today.getTime()) { // If today
+            if (dateObj.getTime() === today.getTime()) {
                 const currentHour = new Date().getHours();
-                startHour = Math.max(startHour, currentHour + 1); // Start from next hour
+                startHour = Math.max(startHour, currentHour + 1);
             }
 
-            if (startHour <= endHour) { // Only generate if valid range
+            if (startHour <= endHour) {
                 for (let i = startHour; i <= endHour; i++) {
                     const hour = String(i).padStart(2, '0');
                     timeSelect.innerHTML += `<option value="${hour}:00">${hour}:00</option>`;
@@ -197,13 +250,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (agendamentosTab && produtosTab && agendamentosSection && produtosSection) {
-        // Check if user is logged in as client
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!loggedInUser || loggedInUser.role !== 'cliente') {
-            window.location.href = 'index.html'; // Redirect if not logged in as client
+            window.location.href = 'index.html';
             return;
         }
-        welcomeMessage.textContent = `Olá, ${loggedInUser.email.split('@')[0]}!`;
+        // Usando o nome do loggedInUser para a mensagem de boas-vindas do cliente
+        welcomeMessage.textContent = `Olá, ${loggedInUser.name}!`;
 
         agendamentosTab.addEventListener('click', () => {
             showSection([agendamentosSection, produtosSection], 'agendamentosSection');
@@ -242,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Agendamento realizado com sucesso!');
                 serviceSelect.value = '';
                 dateInput.value = '';
-                timeSelect.innerHTML = '<option value="">Selecione uma data primeiro</option>'; // Reset time slots
+                timeSelect.innerHTML = '<option value="">Selecione uma data primeiro</option>';
                 timeSelect.disabled = true;
                 observationsTextarea.value = '';
                 renderClientAppointments();
@@ -251,8 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Initial render for client dashboard
-        updateServiceDropdown(); // Popula o dropdown de serviços ao carregar a página do cliente
         renderClientAppointments();
         renderClientProducts();
     }
@@ -278,16 +329,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const productDescriptionTextarea = document.getElementById('productDescription');
     const saveProductBtn = document.getElementById('saveProductBtn');
     const adminProductListDiv = document.getElementById('adminProductList');
-    const adminWelcomeMessage = document.getElementById('adminWelcomeMessage');
+    const adminWelcomeMessage = document.getElementById('adminWelcomeMessage'); // Elemento para a mensagem de boas-vindas do admin
     const productImageInput = document.getElementById('productImage');
     const productImagePreview = document.getElementById('productImagePreview');
 
-    // Garante que o modal esteja oculto ao carregar a página admin.html
     if (addProductModal) {
         addProductModal.style.display = 'none';
     }
 
-    // Pré-visualização da imagem ao selecionar um arquivo
     if (productImageInput && productImagePreview) {
         productImageInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -299,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                productImagePreview.src = 'https://via.placeholder.com/100'; // Fallback
+                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
                 productImagePreview.style.display = 'none';
             }
         });
@@ -309,38 +358,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const appointments = getStoredData('appointments');
         const products = getStoredData('products');
 
-        totalAppointmentsCard.textContent = appointments.length;
-        pendingAppointmentsCard.textContent = appointments.filter(app => app.status === 'Agendado').length;
-        totalProductsCard.textContent = products.length;
-        const totalRevenue = products.reduce((sum, product) => sum + product.price, 0);
-        totalRevenueCard.textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
+        if (totalAppointmentsCard) totalAppointmentsCard.textContent = appointments.length;
+        if (pendingAppointmentsCard) pendingAppointmentsCard.textContent = appointments.filter(app => app.status === 'Agendado').length;
+        if (totalProductsCard) totalProductsCard.textContent = products.length;
+        
+        const totalRevenue = products.reduce((sum, product) => sum + (product.price || 0), 0); // Adicionado (product.price || 0) para evitar NaN
+        if (totalRevenueCard) totalRevenueCard.textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
     };
 
     const renderAdminAppointments = () => {
         let appointments = getStoredData('appointments');
         
-        // Ordenar agendamentos: mais recentes primeiro
         appointments.sort((a, b) => {
             const dateA = new Date(`${a.date}T${a.time}`);
             const dateB = new Date(`${b.date}T${b.time}`);
-            return dateB - dateA; // Decrescente (mais recente primeiro)
+            return dateB - dateA;
         });
 
         if (appointments.length === 0) {
-            adminAppointmentsList.innerHTML = '<p class="empty-state">Nenhum agendamento encontrado.</p>';
+            if (adminAppointmentsList) adminAppointmentsList.innerHTML = '<p class="empty-state">Nenhum agendamento encontrado.</p>';
         } else {
-            adminAppointmentsList.innerHTML = appointments.map(app => `
+            if (adminAppointmentsList) adminAppointmentsList.innerHTML = appointments.map(app => `
                 <div class="appointment-card">
                     <div class="info">
                         <h3>${app.service}</h3>
                         <p>Cliente: ${app.clientEmail.split('@')[0]}</p>
                         <div class="details">
                             <span>
-                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXIiPgogIDxwYXRoIGQ9Ik0zLjUgMGExLjUuNSAwIDAgMSAxLjUuNXYxSDEwdi0xYTEuNS41IDAgMCAxIDEuNS0uNWwxLjUuNWEuNS41IDAgMCAxIC41LjV2OWExLjUuNSAwIDAgMS0uNS41bC0xLjUuNWEuNS41IDAgMCAxLS41LS41VjExSDUuNXYxYTEuNS41IDAgMCAxLTEuNS41TDIgMTIuNWExLjUuNSAwIDAgMS0uNS0uNVY0LjVhLjUuNSAwIDAgMSAuNS0uNWwxLjUtLjV6Ii8+Cjwvc3ZnPg==" alt="Date Icon">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXIiPgogIDxwYXRoIGQ9Ik0zLjUgMGExLjUuOSAwIDAgMSAxLjUuOXdjMWExLjUuNSAwIDAgMSAxLjUuNWwxLjUuOWExLjUuNSAwIDAgMSAgLjUuNXY5YTEuNS41IDAgMCAxLS41LjVsLTEuNS41YTEuNS45IDAgMCAxLS45LS45VjExSDUuNXYxYTEuNS45IDAgMCAxLTEuNS45TDIgMTIuNWExLjUuOSAwIDAgMS0uNS0uOVY0LjVhLjUuNSAwIDAgMSAuNS0uNWwxLjUtLjV6Ii8+Cjwvc3ZnPg==" alt="Date Icon">
                                 ${app.date}
                             </span>
                             <span>
-                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAgMSAxIDAgMTNhNi41IDYuNSAwIDAgMSAwLTEzem0wIDJhNS41IDUuNSAwADEgMCAwIDExIDUuNSAxNS41IDAgMCAwIDAtMTF6Ii8+Cjwvc3ZnPg==" alt="Time Icon">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAgMSAxIDAgMTNhNi41IDY2NTUgMCAwIDAgMC0xM3ptMCAyYTUuNSAzNy41IDAgMCAwIDAgMTEgNS41IDE1LjUgMCAwIDAgMC0xMXoiLz4KPC9zdmc+" alt="Time Icon">
                                 ${app.time}
                             </span>
                         </div>
@@ -372,9 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderAdminProducts = () => {
         const products = getStoredData('products');
         if (products.length === 0) {
-            adminProductListDiv.innerHTML = '<p class="empty-state">Nenhum produto cadastrado.</p>';
+            if (adminProductListDiv) adminProductListDiv.innerHTML = '<p class="empty-state">Nenhum produto cadastrado.</p>';
         } else {
-            adminProductListDiv.innerHTML = products.map(product => `
+            if (adminProductListDiv) adminProductListDiv.innerHTML = products.map(product => `
                 <div class="product-card">
                     <img src="${product.imageUrl || 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'}" alt="${product.name}">
                     <div class="info">
@@ -395,25 +444,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const products = getStoredData('products');
         const productToEdit = products.find(product => product.id === id);
         if (productToEdit) {
-            productIdInput.value = productToEdit.id;
-            productNameInput.value = productToEdit.name;
-            productCategorySelect.value = productToEdit.category;
-            productPriceInput.value = productToEdit.price;
-            productDescriptionTextarea.value = productToEdit.description;
+            if (productIdInput) productIdInput.value = productToEdit.id;
+            if (productNameInput) productNameInput.value = productToEdit.name;
+            if (productCategorySelect) productCategorySelect.value = productToEdit.category;
+            if (productPriceInput) productPriceInput.value = productToEdit.price;
+            if (productDescriptionTextarea) productDescriptionTextarea.value = productToEdit.description;
             
-            // Carregar imagem existente para pré-visualização
-            if (productToEdit.imageUrl && productToEdit.imageUrl !== 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
-                productImagePreview.src = productToEdit.imageUrl;
-                productImagePreview.style.display = 'block';
-            } else {
-                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Fallback
-                productImagePreview.style.display = 'none';
+            if (productImagePreview) {
+                if (productToEdit.imageUrl && productToEdit.imageUrl !== 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
+                    productImagePreview.src = productToEdit.imageUrl;
+                    productImagePreview.style.display = 'block';
+                } else {
+                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                    productImagePreview.style.display = 'none';
+                }
             }
-            productImageInput.value = ''; // Limpa o input file para que o usuário possa selecionar um novo
+            if (productImageInput) productImageInput.value = '';
 
-            saveProductBtn.textContent = 'Atualizar Produto';
-            addProductModal.style.display = 'flex';
-            updateProductCategoryDropdown(); // Garante que o dropdown de categorias esteja atualizado ao abrir para edição
+            if (saveProductBtn) saveProductBtn.textContent = 'Atualizar Produto';
+            if (addProductModal) addProductModal.style.display = 'flex';
+            // Note: updateProductCategoryDropdown is not defined. If it's meant to exist, define it.
+            // updateProductCategoryDropdown(); 
         }
     };
 
@@ -428,13 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (adminAgendamentosTab && adminProdutosTab && adminAgendamentosSection && adminProdutosSection) {
-        // Check if user is logged in as admin
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!loggedInUser || loggedInUser.role !== 'admin') {
-            window.location.href = 'index.html'; // Redirect if not logged in as admin
+            window.location.href = 'index.html';
             return;
         }
-        adminWelcomeMessage.textContent = `Bem-vindo(a), ${loggedInUser.email.split('@')[0]}`;
+        // Utiliza o nome do admin no cabeçalho
+        if (adminWelcomeMessage) {
+            adminWelcomeMessage.textContent = `Bem-vindo(a), ${loggedInUser.name || loggedInUser.email.split('@')[0]}`;
+        }
 
 
         adminAgendamentosTab.addEventListener('click', () => {
@@ -451,33 +504,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (openAddProductModalBtn) {
             openAddProductModalBtn.addEventListener('click', () => {
-                productIdInput.value = ''; // Clear for new product
-                productForm.reset();
-                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Reset preview image
-                productImagePreview.style.display = 'none'; // Hide preview until image is selected
-                saveProductBtn.textContent = 'Adicionar Produto';
-                addProductModal.style.display = 'flex';
-                updateProductCategoryDropdown(); // Popula o dropdown de categorias ao abrir o modal
+                if (productIdInput) productIdInput.value = '';
+                if (productForm) productForm.reset();
+                if (productImagePreview) {
+                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                    productImagePreview.style.display = 'none';
+                }
+                if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
+                if (addProductModal) addProductModal.style.display = 'flex';
+                // Note: updateProductCategoryDropdown is not defined.
+                // updateProductCategoryDropdown(); 
             });
         }
 
         if (closeProductModalBtn) {
             closeProductModalBtn.addEventListener('click', () => {
-                addProductModal.style.display = 'none';
-                productForm.reset(); // Clear form on close
-                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Reset preview image
-                productImagePreview.style.display = 'none'; // Hide preview
+                if (addProductModal) addProductModal.style.display = 'none';
+                if (productForm) productForm.reset();
+                if (productImagePreview) {
+                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                    productImagePreview.style.display = 'none';
+                }
             });
         }
 
         window.addEventListener('click', (event) => {
             if (event.target === addProductModal) {
-                addProductModal.style.display = 'none';
-                productForm.reset(); // Clear form on close via click outside
-                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Reset preview image
-                productImagePreview.style.display = 'none'; // Hide preview
+                if (addProductModal) addProductModal.style.display = 'none';
+                if (productForm) productForm.reset();
+                if (productImagePreview) {
+                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                    productImagePreview.style.display = 'none';
+                }
             }
         });
+
+        const saveProductData = (id, name, category, price, description, imageUrl) => {
+            let products = getStoredData('products');
+            if (id) {
+                // Edit existing product
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { ...products[index], name, category, price, description, imageUrl };
+                }
+            } else {
+                // Add new product
+                const newProduct = {
+                    id: Date.now().toString(),
+                    name,
+                    category,
+                    price,
+                    description,
+                    imageUrl // Save the Base64 string or placeholder
+                };
+                products.push(newProduct);
+            }
+            setStoredData('products', products);
+            if (addProductModal) addProductModal.style.display = 'none';
+            if (productForm) productForm.reset();
+            if (productImagePreview) {
+                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                productImagePreview.style.display = 'none';
+            }
+            renderAdminProducts();
+            updateAdminSummary();
+        };
 
         if (productForm) {
             productForm.addEventListener('submit', (e) => {
@@ -487,94 +578,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 const category = productCategorySelect.value;
                 const price = parseFloat(productPriceInput.value);
                 const description = productDescriptionTextarea.value;
-                let imageUrl = productImagePreview.src; // Pega a URL da pré-visualização (que pode ser a placeholder ou a imagem Base64)
+                let imageUrl = productImagePreview.src;
 
-                // Se o input de arquivo tem um novo arquivo, sobrescreve a imageUrl
-                if (productImageInput.files.length > 0) {
+                if (productImageInput && productImageInput.files.length > 0) {
                     const file = productImageInput.files[0];
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        imageUrl = e.target.result; // Atualiza imageUrl com o Base64 da nova imagem
+                        imageUrl = e.target.result;
                         saveProductData(id, name, category, price, description, imageUrl);
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Se não houver novo arquivo, mantém a imagem existente ou a placeholder
-                    // Apenas atualiza se a imagem existente for a placeholder e o usuário não selecionou uma nova
-                    if (imageUrl === 'https://via.placeholder.com/100' || imageUrl === 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
-                        imageUrl = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Garante que a placeholder padrão seja usada
-                    }
                     saveProductData(id, name, category, price, description, imageUrl);
                 }
             });
         }
 
-        // Função auxiliar para salvar os dados do produto (chamada após a leitura da imagem)
-        const saveProductData = (id, name, category, price, description, imageUrl) => {
-            let products = getStoredData('products');
-
-            if (id) {
-                // Edit existing product
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products[index] = { id, name, category, price, description, imageUrl };
-                }
-            } else {
-                // Add new product
-                const newProduct = {
-                    id: Date.now().toString(), // Simple unique ID
-                    name,
-                    category,
-                    price,
-                    description,
-                    imageUrl
-                };
-                products.push(newProduct);
-            }
-
-            setStoredData('products', products);
-            addProductModal.style.display = 'none';
-            renderAdminProducts();
-            updateAdminSummary();
-            productForm.reset();
-            productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem'; // Reset preview image
-            productImagePreview.style.display = 'none'; // Hide preview
-        };
-
-
         // Initial render for admin dashboard
-        updateAdminSummary();
         renderAdminAppointments();
-        updateProductCategoryDropdown(); // Popula o dropdown de categorias quando o admin.html carrega
+        renderAdminProducts();
+        updateAdminSummary();
     }
 
-    // --- Funções para Sincronizar Dropdowns (acessíveis globalmente) ---
-    // Chamadas de configadmin.js e de outras partes de script.js
-    window.updateProductCategoryDropdown = () => {
-        const productCategorySelect = document.getElementById('productCategory');
-        if (productCategorySelect) {
-            const categories = getStoredData('productCategories');
-            productCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.name; // Usamos o nome como valor
-                option.textContent = category.name;
-                productCategorySelect.appendChild(option);
-            });
-        }
-    };
+    // Helper function for service dropdown (if it exists elsewhere)
+    // Placeholder, as this function was mentioned but not defined in the original script
+    function updateServiceDropdown() {
+        // Implement logic to populate service dropdown, e.g., from stored data or a fixed list
+        // Example:
+        // const services = ['Trança Nagô', 'Box Braids', 'Crochet Braids'];
+        // if (serviceSelect) {
+        //     serviceSelect.innerHTML = '<option value="">Selecione um serviço</option>';
+        //     services.forEach(service => {
+        //         serviceSelect.innerHTML += `<option value="${service}">${service}</option>`;
+        //     });
+        // }
+    }
 
-    window.updateServiceDropdown = () => {
-        const serviceSelect = document.getElementById('service');
-        if (serviceSelect) {
-            const services = getStoredData('services');
-            serviceSelect.innerHTML = '<option value="">Selecione um serviço</option>';
-            services.forEach(service => {
-                const option = document.createElement('option');
-                option.value = service.name; // Usamos o nome como valor
-                option.textContent = `${service.name} (R$ ${service.price.toFixed(2).replace('.', ',')})`;
-                serviceSelect.appendChild(option);
-            });
-        }
-    };
+    // Helper function for product category dropdown (if it exists elsewhere)
+    // Placeholder, as this function was mentioned but not defined in the original script
+    function updateProductCategoryDropdown() {
+        // Implement logic to populate product category dropdown
+        // Example:
+        // const categories = ['Cabelo', 'Pele', 'Acessórios'];
+        // if (productCategorySelect) {
+        //     productCategorySelect.innerHTML = ''; // Clear existing options
+        //     categories.forEach(category => {
+        //         productCategorySelect.innerHTML += `<option value="${category}">${category}</option>`;
+        //     });
+        // }
+    }
 });

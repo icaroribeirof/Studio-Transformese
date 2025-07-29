@@ -691,3 +691,17 @@ body {
 .btn-settings:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--light-text);
+    font-size: 0.9em;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-link:hover {
+    color: var(--text-color);
+}
