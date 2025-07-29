@@ -516,7 +516,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.editProduct = async (id) => {
+        window.editProduct = async (id) => {
+        // Primeiro, atualiza o dropdown de categorias
+        await window.updateProductCategoryDropdown(); // Garante que as opções estejam carregadas
+
         const response = await fetchData('api/produtos.php'); // Busca todos os produtos para encontrar o que editar
         if (response.success) {
             const products = response.products;
@@ -524,7 +527,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (productToEdit) {
                 if (productIdInput) productIdInput.value = productToEdit.id;
                 if (productNameInput) productNameInput.value = productToEdit.nome;
-                if (productCategorySelect) productCategorySelect.value = productToEdit.nome_categoria; // Usa nome_categoria
+                // Agora, atribui o valor da categoria APÓS o dropdown ser preenchido
+                if (productCategorySelect) productCategorySelect.value = productToEdit.nome_categoria;
                 if (productPriceInput) productPriceInput.value = parseFloat(productToEdit.preco).toFixed(2);
                 if (productDescriptionTextarea) productDescriptionTextarea.value = productToEdit.descricao;
 
@@ -543,7 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (saveProductBtn) saveProductBtn.textContent = 'Atualizar Produto';
                 if (addProductModal) addProductModal.style.display = 'flex';
-                window.updateProductCategoryDropdown(); // Atualiza o dropdown de categorias
             }
         } else {
             alert('Erro ao carregar produto para edição: ' + response.message);
@@ -585,19 +588,19 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAdminProducts();
         });
 
-        if (openAddProductModalBtn) {
-            openAddProductModalBtn.addEventListener('click', () => {
-                if (productIdInput) productIdInput.value = '';
-                if (productForm) productForm.reset();
-                if (productImagePreview) {
-                    productImagePreview.src = ''; // Limpa a pré-visualização
-                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
-                }
-                if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
-                if (addProductModal) addProductModal.style.display = 'flex';
-                window.updateProductCategoryDropdown(); // Garante que o dropdown de categorias esteja atualizado
-            });
-        }
+            if (openAddProductModalBtn) {
+        openAddProductModalBtn.addEventListener('click', async () => { // Adicionado 'async'
+            if (productIdInput) productIdInput.value = '';
+            if (productForm) productForm.reset();
+            if (productImagePreview) {
+                productImagePreview.src = ''; // Limpa a pré-visualização
+                productImagePreview.style.display = 'none'; // Esconde a pré-visualização
+            }
+            if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
+            if (addProductModal) addProductModal.style.display = 'flex';
+            await window.updateProductCategoryDropdown(); // Garante que o dropdown de categorias esteja atualizado
+        });
+    }
 
         if (closeProductModalBtn) {
             closeProductModalBtn.addEventListener('click', () => {

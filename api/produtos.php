@@ -19,14 +19,15 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents('php://input'), true);
-        $nome = $data['name'] ?? ''; // Renomeado para 'nome'
-        $nome_categoria = $data['category'] ?? ''; // Recebe o nome da categoria
-        $preco = $data['price'] ?? 0.00; // Renomeado para 'preco'
-        $descricao = $data['description'] ?? ''; // Renomeado para 'descricao'
-        $url_imagem = $data['imageUrl'] ?? null; // Renomeado para 'url_imagem'
 
-        // Buscar o ID da categoria pelo nome
-        $id_categoria = null; // Renomeado para 'id_categoria'
+        $nome = $data['name'] ?? '';
+        $nome_categoria = $data['category'] ?? '';
+        $preco = $data['price'] ?? 0.00;
+        // Garante que $descricao seja uma string, mesmo que o input seja null/undefined
+        $descricao = (string)($data['description'] ?? ''); 
+        $url_imagem = $data['imageUrl'] ?? null;
+
+        $id_categoria = null;
         if (!empty($nome_categoria)) {
             $stmt_cat = $conn->prepare("SELECT id FROM categorias_produto WHERE nome = ?");
             $stmt_cat->bind_param("s", $nome_categoria);
@@ -39,7 +40,10 @@ switch ($method) {
         }
 
         $stmt = $conn->prepare("INSERT INTO produtos (nome, id_categoria, preco, descricao, url_imagem) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sisds", $nome, $id_categoria, $preco, $descricao, $url_imagem);
+
+
+        // O 's' para $descricao está correto
+        $stmt->bind_param("sidss", $nome, $id_categoria, $preco, $descricao, $url_imagem);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Produto adicionado com sucesso!']);
@@ -51,14 +55,16 @@ switch ($method) {
 
     case 'PUT':
         $data = json_decode(file_get_contents('php://input'), true);
+
         $id = $data['id'] ?? null;
         $nome = $data['name'] ?? '';
         $nome_categoria = $data['category'] ?? '';
         $preco = $data['price'] ?? 0.00;
-        $descricao = $data['description'] ?? '';
+        // Garante que $descricao seja uma string, mesmo que o input seja null/undefined
+        $descricao = (string)($data['description'] ?? ''); 
         $url_imagem = $data['imageUrl'] ?? null;
 
-        // Buscar o ID da categoria pelo nome
+
         $id_categoria = null;
         if (!empty($nome_categoria)) {
             $stmt_cat = $conn->prepare("SELECT id FROM categorias_produto WHERE nome = ?");
@@ -72,7 +78,10 @@ switch ($method) {
         }
 
         $stmt = $conn->prepare("UPDATE produtos SET nome = ?, id_categoria = ?, preco = ?, descricao = ?, url_imagem = ? WHERE id = ?");
-        $stmt->bind_param("sisdsi", $nome, $id_categoria, $preco, $descricao, $url_imagem, $id);
+        
+
+        // O 's' para $descricao está correto
+        $stmt->bind_param("sidssi", $nome, $id_categoria, $preco, $descricao, $url_imagem, $id);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Produto atualizado com sucesso!']);
