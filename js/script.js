@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${app.data_agendamento}
                                 </span>
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAgMSAxIDAgMTNhNi41IDY2NTUgMCAwIDAgMC0xM3ptMCAyYTUuNSAzNy41IDAgMCAwIDAgMTEgNSu1IDE1LjUgMCAwIDAgMC0xMXoiLz4KPC9zdmc+" alt="Time Icon">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAg1IDEgMCAxM2E2LjUgNjY1NSAwIDAgMCAwLTEzem0wIDJhNS41IDM3LjUgMCAwIDAgMCAxMSA1LjUgMTUuNSAwIDAgMCAwLTExeiIvPgo8L3N2Zz4=" alt="Time Icon">
                                     ${app.hora_agendamento}
                                 </span>
                             </div>
@@ -385,8 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const productImageInput = document.getElementById('productImage');
     const productImagePreview = document.getElementById('productImagePreview');
 
+    // Garante que o modal esteja oculto e a pré-visualização limpa ao carregar
     if (addProductModal) {
         addProductModal.style.display = 'none';
+    }
+    if (productImagePreview) {
+        productImagePreview.src = ''; // Limpa o src inicial
+        productImagePreview.style.display = 'none'; // Esconde a pré-visualização
     }
 
     if (productImageInput && productImagePreview) {
@@ -400,7 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                // Se o arquivo for deselecionado, esconde a pré-visualização
+                productImagePreview.src = '';
                 productImagePreview.style.display = 'none';
             }
         });
@@ -446,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${app.data_agendamento}
                                 </span>
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAgMSAxIDAgMTNhNi41IDY2NTUgMCAwIDAgMC0xM3ptMCAyYTUuNSAzNy41IDAgMCAwIDAgMTEgNS41IDE1LjUgMCAwIDAgMC0xMXoiLz4KPC9zdmc+" alt="Time Icon">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAg1IDEgMCAxM2E2LjUgNjY1NSAwIDAgMCAwLTEzem0wIDJhNS41IDM3LjUgMCAwIDAgMCAxMSA1LjUgMTUuNSAwIDAgMCAwLTExeiIvPgo8L3N2Zz4=" alt="Time Icon">
                                     ${app.hora_agendamento}
                                 </span>
                             </div>
@@ -523,15 +529,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (productDescriptionTextarea) productDescriptionTextarea.value = productToEdit.descricao;
 
                 if (productImagePreview) {
+                    // Se houver uma URL de imagem válida, exibe-a
                     if (productToEdit.url_imagem && productToEdit.url_imagem !== 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
                         productImagePreview.src = productToEdit.url_imagem;
                         productImagePreview.style.display = 'block';
                     } else {
-                        productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                        // Caso contrário, esconde a pré-visualização
+                        productImagePreview.src = '';
                         productImagePreview.style.display = 'none';
                     }
                 }
-                if (productImageInput) productImageInput.value = ''; // Limpa o campo de arquivo
+                if (productImageInput) productImageInput.value = ''; // Limpa o campo de arquivo para nova seleção
 
                 if (saveProductBtn) saveProductBtn.textContent = 'Atualizar Produto';
                 if (addProductModal) addProductModal.style.display = 'flex';
@@ -582,8 +590,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (productIdInput) productIdInput.value = '';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
-                    productImagePreview.style.display = 'none';
+                    productImagePreview.src = ''; // Limpa a pré-visualização
+                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
                 }
                 if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
                 if (addProductModal) addProductModal.style.display = 'flex';
@@ -596,8 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (addProductModal) addProductModal.style.display = 'none';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
-                    productImagePreview.style.display = 'none';
+                    productImagePreview.src = ''; // Limpa a pré-visualização
+                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
                 }
             });
         }
@@ -607,22 +615,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (addProductModal) addProductModal.style.display = 'none';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
-                    productImagePreview.style.display = 'none';
+                    productImagePreview.src = ''; // Limpa a pré-visualização
+                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
                 }
             }
         });
 
-        const saveProductData = async (id, name, category, price, description, imageUrl) => {
+        const saveProductData = async (id, name, category, price, description, newImageUrl = null) => {
             const method = id ? 'PUT' : 'POST';
             const url = 'api/produtos.php';
+
+            let finalImageUrl = newImageUrl; // Se uma nova imagem foi carregada, use a Data URL
+
+            // Se não houver nova imagem, e for uma edição, tente manter a imagem existente
+            if (!newImageUrl && id) {
+                // Busca o produto novamente para obter a URL da imagem atual do banco de dados
+                const existingProductsResponse = await fetchData('api/produtos.php');
+                if (existingProductsResponse.success) {
+                    const existingProduct = existingProductsResponse.products.find(p => p.id == id);
+                    if (existingProduct) {
+                        finalImageUrl = existingProduct.url_imagem;
+                    }
+                }
+            }
+
+            // Se ainda não houver imagem, defina como null ou string vazia
+            if (!finalImageUrl || finalImageUrl === 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
+                finalImageUrl = null; // Ou '' dependendo de como você quer armazenar no DB
+            }
+
             const data = {
                 id: id,
                 name: name,
                 category: category,
                 price: price,
                 description: description,
-                imageUrl: imageUrl
+                imageUrl: finalImageUrl // Envia a URL final
             };
 
             const response = await fetchData(url, method, data);
@@ -631,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (addProductModal) addProductModal.style.display = 'none';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem';
+                    productImagePreview.src = '';
                     productImagePreview.style.display = 'none';
                 }
                 renderAdminProducts();
@@ -649,18 +677,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const category = productCategorySelect.value;
                 const price = parseFloat(productPriceInput.value);
                 const description = productDescriptionTextarea.value;
-                let imageUrl = productImagePreview.src;
 
                 if (productImageInput && productImageInput.files.length > 0) {
                     const file = productImageInput.files[0];
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        imageUrl = e.target.result;
-                        saveProductData(id, name, category, price, description, imageUrl);
+                        // Passa a Data URL como newImageUrl
+                        saveProductData(id, name, category, price, description, e.target.result);
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    saveProductData(id, name, category, price, description, imageUrl);
+                    // Se não há novo arquivo, passa null para newImageUrl,
+                    // a função saveProductData decidirá se mantém a URL existente.
+                    saveProductData(id, name, category, price, description, null);
                 }
             });
         }

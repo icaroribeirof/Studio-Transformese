@@ -91,7 +91,8 @@ if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !==
                 <div class="form-group">
                     <label for="productImage">Imagem do Produto</label>
                     <input type="file" id="productImage" accept="image/*">
-                    <img id="productImagePreview" src="https://via.placeholder.com/100" alt="Pré-visualização da Imagem" style="max-width: 100px; max-height: 100px; margin-top: 10px; border-radius: 5px; display: none;">
+                    <!-- REMOVIDO src="https://via.placeholder.com/100" e style="display: none;" INICIAIS -->
+                    <img id="productImagePreview" alt="Pré-visualização da Imagem" style="max-width: 100px; max-height: 100px; margin-top: 10px; border-radius: 5px;">
                 </div>
                 <div class="form-group full-width">
                     <label for="productDescription">Descrição</label>
