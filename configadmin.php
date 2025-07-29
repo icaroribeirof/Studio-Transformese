@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !== 'admin') { // 'funcao' em vez de 'role'
+    header('Location: index.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -10,9 +17,9 @@
 <body>
     <header class="dashboard-header admin-header">
         <div class="header-content">
-            <h1 id="adminHeaderTitle">Configurações Admin</h1> 
+            <h1 id="adminHeaderTitle">Configurações Admin</h1>
             <div class="header-actions">
-                <button class="btn-back" onclick="window.location.href='admin.html'">
+                <button class="btn-back" onclick="window.location.href='admin.php'">
                 Voltar
                 </button>
                 <button class="btn-logout" onclick="logout()">Sair</button>

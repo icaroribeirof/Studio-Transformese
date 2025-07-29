@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !== 'admin') { // 'funcao' em vez de 'role'
+    header('Location: index.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,7 +18,7 @@
         <div class="header-content">
             <h1 id="adminWelcomeMessage">Bem-vinda, Admin!</h1>
             <div class="header-actions">
-                <button class="btn-settings" onclick="window.location.href='configadmin.html'">
+                <button class="btn-settings" onclick="window.location.href='configadmin.php'">
                     <img src="https://cdn-icons-png.flaticon.com/512/40/40031.png" alt="Configurações">
                 </button>
                 <button class="btn-logout" onclick="logout()">Sair</button>

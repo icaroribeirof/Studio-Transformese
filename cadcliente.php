@@ -1,3 +1,6 @@
+<?php
+session_start(); // Inicia a sessão para que o script.js possa usar sessionStorage
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -34,7 +37,7 @@
                 </div>
                 <button type="submit" class="btn-primary" id="submitCadastroBtn">Cadastrar</button>
             </form>
-            <button class="btn-link" onclick="window.location.href='index.html'">Já tenho conta. Fazer login.</button>
+            <button class="btn-link" onclick="window.location.href='index.php'">Já tenho conta. Fazer login.</button>
         </div>
     </div>
     <script src="js/script.js"></script>

@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !== 'cliente') { // 'funcao' em vez de 'role'
+    header('Location: index.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -31,9 +38,7 @@
                         <label for="service">Serviço</label>
                         <select id="service">
                             <option value="">Selecione um serviço</option>
-                            <option value="Trança Nagô">Trança Nagô</option>
-                            <option value="Box Braids">Box Braids</option>
-                            <option value="Crochet Braids">Crochet Braids</option>
+                            <!-- Opções serão carregadas via JS do banco de dados -->
                         </select>
                     </div>
                     <div class="form-group">
@@ -55,8 +60,6 @@
 
                 <h2>Seus Agendamentos</h2>
                 <div id="noAppointments" class="empty-state">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXItZWRpdCI+CiAgPHBhdGggZD0iTTMuNTkgMS41bDEuMjkgMS4zMDJBLjUuNSAwIDAgMCA1LjM0IDIuOWEzIDMgMCAwIDAgNS4wNjYuNTE3bDEuMzAyLTEuMjlhLjUuNSAwIDAgMCAuNzAxLjA4NmwxLjU1OCA3LjAzMi03LjAzMiAxLjU1OGEuNS41IDAgMCAwLS4wODYuNzAxbC0xLjI5LTEuMzAyQTMgMyAwIDAgMCAuNTc2IDEyLjk4NC41LjUuNSAwIDAgMCAtLjQ2NiAxMi43bC0uNy03Yy0uMS0uOS43LTQuMiAxLjUtNmw2LTRoYzAtLjEgMS44LjcgMS41IDEuNXoiLz4KPC9zdmc+"
-                        alt="Calendar Icon">
                     <p>Você ainda não tem agendamentos.</p>
                 </div>
                 <div id="appointmentsList" class="appointments-list">
