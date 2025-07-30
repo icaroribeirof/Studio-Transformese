@@ -1,0 +1,187 @@
+/* configadmin.css */
+
+.config-container {
+    padding: 100px 20px 20px; /* Ajuste para o header fixo */
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.config-nav {
+    display: flex;
+    margin-bottom: 30px;
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    padding: 10px;
+}
+
+.config-nav .nav-button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--light-text);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.config-nav .nav-button.active {
+    background: var(--primary-gradient);
+    color: var(--white);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.config-nav .nav-button:hover:not(.active) {
+    color: var(--text-color);
+    background-color: #f0f0f0;
+}
+
+.config-content .tab-section {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+}
+
+.config-content h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #9C27B0;
+    text-align: center;
+}
+
+.add-form {
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 20px;
+}
+
+.list-container h3 {
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    border-left: 5px solid #E91E63;
+    padding-left: 10px;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 15px;
+}
+
+.item-list li {
+    background: var(--light-bg);
+    padding: 15px 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap; /* Para responsividade */
+}
+
+.item-list li .item-info {
+    flex-grow: 1;
+}
+
+.item-list li .item-info strong {
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+.item-list li .item-info span {
+    display: block;
+    font-size: 0.9em;
+    color: var(--light-text);
+}
+
+.item-list li .item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px; /* Para empurrar botões para baixo em telas pequenas */
+}
+
+.item-list li .item-actions .btn {
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s ease;
+}
+
+.item-list li .item-actions .btn-edit {
+    background-color: #FFC107; /* Amarelo */
+    color: var(--white);
+}
+
+.item-list li .item-actions .btn-edit:hover {
+    background-color: #e0a800;
+}
+
+.item-list li .item-actions .btn-delete {
+    background-color: #DC3545; /* Vermelho */
+    color: var(--white);
+}
+
+.item-list li .item-actions .btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Back button in header */
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    color: var(--white);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-back img {
+    width: 20px;
+    height: 20px;
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(200%) contrast(100%);
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .config-nav {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .config-nav .nav-button {
+        width: 100%;
+    }
+
+    .config-content .tab-section {
+        padding: 20px;
+    }
+
+    .item-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-list li .item-actions {
+        width: 100%;
+        justify-content: flex-end; /* Alinha botões à direita em telas pequenas */
+        margin-top: 15px; /* Mais espaço acima dos botões */
+    }
+}
