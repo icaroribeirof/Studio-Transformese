@@ -19,7 +19,7 @@ if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !==
             <h1 id="adminWelcomeMessage">Bem-vinda, Admin!</h1>
             <div class="header-actions">
                 <button class="btn-settings" onclick="window.location.href='configadmin.php'">
-                    <img src="https://cdn-icons-png.flaticon.com/512/40/40031.png" alt="Configurações">
+                    <img src="img/config.png" alt="Configurações">
                 </button>
                 <button class="btn-logout" onclick="logout()">Sair</button>
             </div>
@@ -29,19 +29,19 @@ if (!isset($_SESSION['loggedInUser']) || $_SESSION['loggedInUser']['funcao'] !==
     <div class="dashboard-container">
         <div class="admin-summary">
             <div class="summary-card">
-                <h3>Total Agendamentos</h3>
+                <h3>Total de Agendamentos</h3>
                 <p id="totalAppointments">0</p>
             </div>
             <div class="summary-card">
-                <h3>Pendentes</h3>
+                <h3>Agendamentos Pendentes</h3>
                 <p id="pendingAppointments">0</p>
             </div>
             <div class="summary-card">
-                <h3>Produtos</h3>
+                <h3>Produtos Anunciados</h3>
                 <p id="totalProducts">0</p>
             </div>
             <div class="summary-card">
-                <h3>Valor Total</h3>
+                <h3>Valor Total - Produtos</h3>
                 <p id="totalRevenue">R$ 0.00</p>
             </div>
         </div>

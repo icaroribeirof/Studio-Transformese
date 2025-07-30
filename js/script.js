@@ -62,6 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Formatação de data para o padrão brasileiro
+    function formatDateToBrazilian(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // Formatação de hora para o padrão brasileiro
+    function formatTimeToBrazilian(timeString) {
+        if (!timeString) return '--:--';
+        const [hours, minutes] = timeString.split(':');
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+
     window.logout = logout;
 
     const loginForm = document.getElementById('loginForm');
@@ -188,15 +204,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="appointment-card">
                         <div class="info">
                             <h3>${app.nome_servico}</h3>
-                            <p>Cliente: ${app.email_cliente}</p>
+                            <p>Cliente: ${loggedInUser.name}</p>
                             <div class="details">
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXItZWRpdCI+CiAgPHBhdGggZD0iTTMuNTkgMS41bDEuMjkgMS4zMDJBLjUuNSAwIDAgMCA1LjM0IDIuOWEzIDMgMCAwIDAgNS4wNjYuNTE3bDEuMzAyLTEuMjlhLjUuNSAwIDAgMCAuNzAxLjA4NmwxLjU1OCA3LjAzMi03LjAzMiAxLjU1OGEu5.5IDAgMCAwLS4wODYuNzAxbC0xLjI5LTEuMzAyQTMgMyAwIDAgMCAuNTc2IDEyLjk4NC41LjU.5IDAgMCAwIC0uNDY2IDEyLjc0bC0uNy03Yy0uMS0uOS43LTQuMiAxLjUtNmw2LTRoYzAtLjEgMS44LjcgMS41IDEuNXoiLz4KPC9zdmc+" alt="Calendar Icon">
-                                    ${app.data_agendamento}
+                                    <img src="img/calendario.png" alt="Icone Calendario">
+                                    ${formatDateToBrazilian(app.data_agendamento)}
                                 </span>
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAg1IDEgMCAxM2E2LjUgNjY1NSAwIDAgMCAwLTEzem0wIDJhNS41IDM3LjUgMCAwIDAgMCAxMSA1LjUgMTUuNSAwIDAgMCAwLTExeiIvPgo8L3N2Zz4=" alt="Time Icon">
-                                    ${app.hora_agendamento}
+                                    <img src="img/relogio.png" alt="Icone Relogio">
+                                    ${formatTimeToBrazilian(app.hora_agendamento)}
                                 </span>
                             </div>
                             ${app.observacoes ? `<p>Obs: ${app.observacoes}</p>` : ''}
@@ -247,59 +263,70 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const generateTimeSlots = async () => {
-    timeSelect.innerHTML = '<option value="">Selecione um horário</option>';
-    timeSelect.disabled = true;
-    const selectedDate = dateInput.value;
+        timeSelect.innerHTML = '<option value="">Carregando horários...</option>';
+        timeSelect.disabled = true;
 
-    if (selectedDate) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas a data
+        const selectedDate = dateInput.value;
+        console.log('Data selecionada:', selectedDate);
 
-        const dateObj = new Date(selectedDate + 'T00:00:00'); // Garante que a data seja interpretada corretamente
-        dateObj.setHours(0, 0, 0, 0);
-
-        let startHour = 9;
-        const endHour = 18; // Supondo que o expediente vai até as 18:00
-
-        // Se a data selecionada for hoje, ajuste a hora de início para a próxima hora cheia
-        if (dateObj.getTime() === today.getTime()) {
-            const currentHour = new Date().getHours();
-            startHour = Math.max(startHour, currentHour + 1);
+        if (!selectedDate) {
+            timeSelect.innerHTML = '<option value="">Selecione uma data primeiro</option>';
+            return;
         }
 
-        // Busca horários ocupados para a data selecionada
-        const response = await fetchData(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`);
-        let occupiedTimes = [];
-        if (response.success) {
-            occupiedTimes = response.occupied_times;
-        } else {
-            console.error('Erro ao buscar horários ocupados:', response.message);
-        }
+        try {
+            // Horários de funcionamento
+            const horariosBase = [
+                '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+                '17:00', '17:30'
+            ];
 
-        let hasAvailableSlots = false;
-        if (startHour <= endHour) {
-            for (let i = startHour; i <= endHour; i++) {
-                const hour = String(i).padStart(2, '0');
-                const timeSlot = `${hour}:00`;
+            // Se for hoje, remove horários já passados
+            const hoje = new Date();
+            const dataEscolhida = new Date(selectedDate + 'T00:00:00');
+            let horariosDisponiveis = [...horariosBase];
 
-                // Adiciona o horário APENAS se não estiver na lista de horários ocupados
-                if (!occupiedTimes.includes(timeSlot)) {
-                    const option = document.createElement('option');
-                    option.value = timeSlot;
-                    option.textContent = timeSlot;
-                    timeSelect.appendChild(option);
-                    hasAvailableSlots = true;
-                }
+            if (dataEscolhida.toDateString() === hoje.toDateString()) {
+                const agora = new Date();
+                const tempoAtual = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+                horariosDisponiveis = horariosBase.filter(horario => horario > tempoAtual);
             }
-            timeSelect.disabled = !hasAvailableSlots; // Desabilita se não houver slots
-            if (!hasAvailableSlots) {
+
+            // Busca horários ocupados
+            const response = await fetch(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                timeSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                return;
+            }
+
+            // Filtra horários livres
+            const horariosOcupados = data.occupied_times || [];
+            const horariosLivres = horariosDisponiveis.filter(horario => !horariosOcupados.includes(horario));
+
+            // Popula dropdown
+            timeSelect.innerHTML = '<option value="">Selecione um horário</option>';
+
+            if (horariosLivres.length === 0) {
                 timeSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+                timeSelect.disabled = true;
+            } else {
+                horariosLivres.forEach(horario => {
+                    const option = document.createElement('option');
+                    option.value = horario;
+                    option.textContent = horario;
+                    timeSelect.appendChild(option);
+                });
+                timeSelect.disabled = false;
             }
-        } else {
-            timeSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+
+        } catch (error) {
+            console.error('Erro:', error);
+            timeSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
         }
-    }
-};
+    };
 
 
     if (agendamentosTab && produtosTab && agendamentosSection && produtosSection) {
@@ -414,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (productImageInput && productImagePreview) {
-        productImageInput.addEventListener('change', function() {
+        productImageInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     productImagePreview.src = e.target.result;
                     productImagePreview.style.display = 'block';
                 };
@@ -433,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateAdminSummary = async () => {
         const appointmentsResponse = await fetchData('api/agendamentos.php?role=admin');
         const productsResponse = await fetchData('api/produtos.php');
-
         if (appointmentsResponse.success) {
             const appointments = appointmentsResponse.agendamentos;
             if (totalAppointmentsCard) totalAppointmentsCard.textContent = appointments.length;
@@ -441,9 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             console.error('Falha ao carregar resumo de agendamentos:', appointmentsResponse.message);
         }
-
         if (productsResponse.success) {
-            const products = products.products;
+            // CORREÇÃO AQUI: Acesse productsResponse.products diretamente
+            const products = productsResponse.products; // <--- LINHA CORRIGIDA
             if (totalProductsCard) totalProductsCard.textContent = products.length;
             const totalRevenue = products.reduce((sum, product) => sum + (parseFloat(product.preco) || 0), 0);
             if (totalRevenueCard) totalRevenueCard.textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
@@ -463,15 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="appointment-card">
                         <div class="info">
                             <h3>${app.nome_servico}</h3>
-                            <p>Cliente: ${app.email_cliente.split('@')[0]}</p>
+                            <p>Cliente: ${app.nome_cliente}</p>
                             <div class="details">
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXIiPgogIDxwYXRoIGQ9Ik0zLjUgMGExLjUuOSAwIDAgMSAxLjUuOXdjMWExLjUuNSAwIDAgMSAxLjUuNWwxLjUuOWExLjUuNSAwIDAgMSAgLjUuNXY5YTEuNS41IDAgMCAxLS41LjVsLTEuNS41YTEuNS45IDAgMCAxLS45LS45VjExSDUuNXYxYTEuNS45IDAgMCAxLTEuNS45TDIgMTIuNWExLjUuOSAwIDAgMS0uNS0uOVY0LjVhLjUuNSAwIDAgMSAuNS0uNWwxLjUtLjV6Ii8+Cjwvc3ZnPg==" alt="Date Icon">
-                                    ${app.data_agendamento}
+                                    <img src="img/calendario.png" alt="Icone Calendario">
+                                    ${formatDateToBrazilian(app.data_agendamento)}
                                 </span>
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2xvY2siPgogIDxwYXRoIGQ9Ik04IDBhOC4wMDEgOC4wMDEgMCAwIDAgMCAxNGE4LjAwMSA4LjAwMSAwIDAgMCAwLTE0em0wIDEuNWE2LjUgNi41IDAg1IDEgMCAxM2E2LjUgNjY1NSAwIDAgMCAwLTEzem0wIDJhNS41IDM3LjUgMCAwIDAgMCAxMSA1LjUgMTUuNSAwIDAgMCAwLTExeiIvPgo8L3N2Zz4=" alt="Time Icon">
-                                    ${app.hora_agendamento}
+                                    <img src="img/relogio.png" alt="Icone Relogio">
+                                    ${formatTimeToBrazilian(app.hora_agendamento)}
                                 </span>
                             </div>
                         </div>
@@ -534,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-        window.editProduct = async (id) => {
+    window.editProduct = async (id) => {
         await window.updateProductCategoryDropdown();
 
         const response = await fetchData('api/produtos.php');
@@ -602,19 +628,19 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAdminProducts();
         });
 
-            if (openAddProductModalBtn) {
-        openAddProductModalBtn.addEventListener('click', async () => {
-            if (productIdInput) productIdInput.value = '';
-            if (productForm) productForm.reset();
-            if (productImagePreview) {
-                productImagePreview.src = '';
-                productImagePreview.style.display = 'none';
-            }
-            if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
-            if (addProductModal) addProductModal.style.display = 'flex';
-            await window.updateProductCategoryDropdown();
-        });
-    }
+        if (openAddProductModalBtn) {
+            openAddProductModalBtn.addEventListener('click', async () => {
+                if (productIdInput) productIdInput.value = '';
+                if (productForm) productForm.reset();
+                if (productImagePreview) {
+                    productImagePreview.src = '';
+                    productImagePreview.style.display = 'none';
+                }
+                if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
+                if (addProductModal) addProductModal.style.display = 'flex';
+                await window.updateProductCategoryDropdown();
+            });
+        }
 
         if (closeProductModalBtn) {
             closeProductModalBtn.addEventListener('click', () => {
@@ -695,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (productImageInput && productImageInput.files.length > 0) {
                     const file = productImageInput.files[0];
                     const reader = new FileReader();
-                    reader.onload = function(e) {
+                    reader.onload = function (e) {
                         saveProductData(id, name, category, price, description, e.target.result);
                     };
                     reader.readAsDataURL(file);

@@ -12,33 +12,45 @@ switch ($method) {
         $id_usuario = $_GET['id_usuario'] ?? null;
         $funcao = $_GET['role'] ?? null;
 
-        if ($action === 'get_available_times') { // Lógica para buscar horários ocupados
-            $data_agendamento = $_GET['date'] ?? null;
-            if (empty($data_agendamento)) {
-                echo json_encode(['success' => false, 'message' => 'Data é obrigatória para buscar horários.']);
-                exit;
-            }
+        if ($action === 'get_available_times') {
+    $data_agendamento = $_GET['date'] ?? null;
+    
+    if (empty($data_agendamento)) {
+        echo json_encode(['success' => false, 'message' => 'Data é obrigatória para buscar horários.']);
+        exit;
+    }
 
-            // Busca horários que já estão agendados ou concluídos para a data
-            $sql = "SELECT hora_agendamento FROM agendamentos WHERE data_agendamento = ? AND (status = 'Agendado' OR status = 'Concluído')";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $data_agendamento);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $occupied_times = [];
-            while ($row = $result->fetch_assoc()) {
-                $occupied_times[] = $row['hora_agendamento'];
-            }
-            echo json_encode(['success' => true, 'occupied_times' => $occupied_times]);
-            $stmt->close();
-            break;
-        }
+    // Busca horários ocupados com formatação consistente
+    $sql = "SELECT TIME_FORMAT(hora_agendamento, '%H:%i') as hora_formatada 
+            FROM agendamentos 
+            WHERE data_agendamento = ? 
+            AND (status = 'Agendado' OR status = 'Concluído')
+            ORDER BY hora_agendamento";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $data_agendamento);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $occupied_times = [];
+    while ($row = $result->fetch_assoc()) {
+        $occupied_times[] = $row['hora_formatada'];
+    }
+    
+    echo json_encode(['success' => true, 'occupied_times' => $occupied_times]);
+    $stmt->close();
+    break;
+}
 
         // Lógica para buscar agendamentos (admin ou cliente)
-        if ($funcao === 'admin') {
-            $sql = "SELECT a.*, u.email AS email_cliente FROM agendamentos a JOIN usuarios u ON a.id_usuario = u.id ORDER BY data_agendamento DESC, hora_agendamento DESC";
+         if ($funcao === 'admin') {
+            // ALTERAÇÃO AQUI: Adicionar u.nome AS nome_cliente
+            // Você pode manter u.email AS email_cliente se quiser ter o email disponível para outras finalidades,
+            // mas para exibir o nome, precisamos de u.nome.
+            $sql = "SELECT a.*, u.email AS email_cliente, u.nome AS nome_cliente FROM agendamentos a JOIN usuarios u ON a.id_usuario = u.id ORDER BY data_agendamento DESC, hora_agendamento DESC";
             $stmt = $conn->prepare($sql);
         } elseif ($funcao === 'cliente' && $id_usuario) {
+            // Manter esta consulta como está, pois é para o cliente ver seus próprios agendamentos
             $sql = "SELECT a.*, u.email AS email_cliente FROM agendamentos a JOIN usuarios u ON a.id_usuario = u.id WHERE a.id_usuario = ? ORDER BY data_agendamento DESC, hora_agendamento DESC";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $id_usuario);
