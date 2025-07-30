@@ -8,9 +8,33 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
     case 'GET':
-        $id_usuario = $_GET['id_usuario'] ?? null; // Renomeado para 'id_usuario'
-        $funcao = $_GET['role'] ?? null; // Renomeado para 'funcao'
+        $action = $_GET['action'] ?? null;
+        $id_usuario = $_GET['id_usuario'] ?? null;
+        $funcao = $_GET['role'] ?? null;
 
+        if ($action === 'get_available_times') { // Lógica para buscar horários ocupados
+            $data_agendamento = $_GET['date'] ?? null;
+            if (empty($data_agendamento)) {
+                echo json_encode(['success' => false, 'message' => 'Data é obrigatória para buscar horários.']);
+                exit;
+            }
+
+            // Busca horários que já estão agendados ou concluídos para a data
+            $sql = "SELECT hora_agendamento FROM agendamentos WHERE data_agendamento = ? AND (status = 'Agendado' OR status = 'Concluído')";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $data_agendamento);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $occupied_times = [];
+            while ($row = $result->fetch_assoc()) {
+                $occupied_times[] = $row['hora_agendamento'];
+            }
+            echo json_encode(['success' => true, 'occupied_times' => $occupied_times]);
+            $stmt->close();
+            break;
+        }
+
+        // Lógica para buscar agendamentos (admin ou cliente)
         if ($funcao === 'admin') {
             $sql = "SELECT a.*, u.email AS email_cliente FROM agendamentos a JOIN usuarios u ON a.id_usuario = u.id ORDER BY data_agendamento DESC, hora_agendamento DESC";
             $stmt = $conn->prepare($sql);
@@ -35,11 +59,11 @@ switch ($method) {
 
     case 'POST':
         $data = json_decode(file_get_contents('php://input'), true);
-        $id_usuario = $data['userId'] ?? null; // Renomeado para 'id_usuario'
-        $nome_servico = $data['service'] ?? ''; // Renomeado para 'nome_servico'
-        $data_agendamento = $data['date'] ?? ''; // Renomeado para 'data_agendamento'
-        $hora_agendamento = $data['time'] ?? ''; // Renomeado para 'hora_agendamento'
-        $observacoes = $data['observations'] ?? ''; // Renomeado para 'observacoes'
+        $id_usuario = $data['userId'] ?? null;
+        $nome_servico = $data['service'] ?? '';
+        $data_agendamento = $data['date'] ?? '';
+        $hora_agendamento = $data['time'] ?? '';
+        $observacoes = $data['observations'] ?? '';
 
         if (empty($id_usuario) || empty($nome_servico) || empty($data_agendamento) || empty($hora_agendamento)) {
             echo json_encode(['success' => false, 'message' => 'Todos os campos obrigatórios devem ser preenchidos.']);
@@ -79,7 +103,6 @@ switch ($method) {
         break;
 
     case 'DELETE':
-        // Não implementado no JS original, mas seria similar
         echo json_encode(['success' => false, 'message' => 'Método DELETE não implementado para agendamentos.']);
         break;
 

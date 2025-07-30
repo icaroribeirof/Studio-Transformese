@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Common Functions ---
-    // getStoredData e setStoredData agora usam sessionStorage para dados de sessão (loggedInUser)
-    // e não mais para dados persistentes que vão para o banco de dados.
     const getStoredData = (key) => {
         return JSON.parse(sessionStorage.getItem(key)) || null;
     };
@@ -10,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem(key, JSON.stringify(data));
     };
 
-    // Função para fazer requisições à API
     const fetchData = async (url, method = 'GET', data = null) => {
         const options = {
             method: method,
@@ -56,17 +53,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const logout = async () => {
-        // Envia uma requisição para o backend para destruir a sessão PHP
         const response = await fetchData('api/logout.php', 'POST');
         if (response.success) {
-            sessionStorage.removeItem('loggedInUser'); // Limpa o sessionStorage também
-            window.location.href = 'index.php'; // Redireciona para a página de login
+            sessionStorage.removeItem('loggedInUser');
+            window.location.href = 'index.php';
         } else {
             alert('Erro ao fazer logout: ' + response.message);
         }
     };
 
-    window.logout = logout; // Torna logout acessível globalmente
+    window.logout = logout;
 
     const loginForm = document.getElementById('loginForm');
     const clienteBtn = document.getElementById('clienteBtn');
@@ -76,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitLoginBtn = document.getElementById('submitLoginBtn');
     const cadastroButtonContainer = document.getElementById('cadastroButtonContainer');
 
-    let currentRole = 'cliente'; // Default role
+    let currentRole = 'cliente';
 
     const handleRoleChange = (role) => {
         currentRole = role;
@@ -102,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clienteBtn && adminBtn) {
         clienteBtn.addEventListener('click', () => handleRoleChange('cliente'));
         adminBtn.addEventListener('click', () => handleRoleChange('admin'));
-        handleRoleChange(currentRole); // Inicializa o estado dos botões
+        handleRoleChange(currentRole);
     }
 
     if (loginForm) {
@@ -119,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.success) {
-                setStoredData('loggedInUser', response.user); // Armazena no sessionStorage
+                setStoredData('loggedInUser', response.user);
                 if (currentRole === 'cliente') {
                     window.location.href = 'cliente.php';
                 } else if (currentRole === 'admin') {
@@ -176,14 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderClientAppointments = async () => {
         const loggedInUser = getStoredData('loggedInUser');
         if (!loggedInUser || loggedInUser.role !== 'cliente') {
-            // Redirecionamento já é feito pelo PHP, mas é bom ter uma fallback
             window.location.href = 'index.php';
             return;
         }
 
         const response = await fetchData(`api/agendamentos.php?id_usuario=${loggedInUser.id}&role=cliente`);
         if (response.success) {
-            const appointments = response.agendamentos; // 'agendamentos' do PHP
+            const appointments = response.agendamentos;
             if (appointments.length === 0) {
                 noAppointmentsMessage.classList.remove('hidden');
                 appointmentsList.innerHTML = '';
@@ -196,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p>Cliente: ${app.email_cliente}</p>
                             <div class="details">
                                 <span>
-                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXItZWRpdCI+CiAgPHBhdGggZD0iTTMuNTkgMS41bDEuMjkgMS4zMDJBLjUuNSAwIDAgMCA1LjM0IDIuOWEzIDMgMCAwIDAgNS4wNjYuNTE3bDEuMzAyLTEuMjlhLjUuNSAwIDAgMCAuNzAxLjA4NmwxLjU1OCA3LjAzMi03LjAzMiAxLjU1OGEuNS41IDAgMCAwLS4wODYuNzAxbC0xLjI5LTEuMzAyQTMgMyAwIDAgMCAuNTc2IDEyLjk4NC41LjU.5IDAgMCAwIC0uNDY2IDEyLjc0bC0uNy03Yy0uMS0uOS43LTQuMiAxLjUtNmw2LTRoYzAtLjEgMS44LjcgMS41IDEuNXoiLz4KPC9zdmc+" alt="Calendar Icon">
+                                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmktY2FsZW5kYXItZWRpdCI+CiAgPHBhdGggZD0iTTMuNTkgMS41bDEuMjkgMS4zMDJBLjUuNSAwIDAgMCA1LjM0IDIuOWEzIDMgMCAwIDAgNS4wNjYuNTE3bDEuMzAyLTEuMjlhLjUuNSAwIDAgMCAuNzAxLjA4NmwxLjU1OCA3LjAzMi03LjAzMiAxLjU1OGEu5.5IDAgMCAwLS4wODYuNzAxbC0xLjI5LTEuMzAyQTMgMyAwIDAgMCAuNTc2IDEyLjk4NC41LjU.5IDAgMCAwIC0uNDY2IDEyLjc0bC0uNy03Yy0uMS0uOS43LTQuMiAxLjUtNmw2LTRoYzAtLjEgMS44LjcgMS41IDEuNXoiLz4KPC9zdmc+" alt="Calendar Icon">
                                     ${app.data_agendamento}
                                 </span>
                                 <span>
@@ -251,34 +246,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const generateTimeSlots = () => {
-        timeSelect.innerHTML = '<option value="">Selecione um horário</option>';
-        timeSelect.disabled = true;
-        const selectedDate = dateInput.value;
-        if (selectedDate) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+    const generateTimeSlots = async () => {
+    timeSelect.innerHTML = '<option value="">Selecione um horário</option>';
+    timeSelect.disabled = true;
+    const selectedDate = dateInput.value;
 
-            const dateObj = new Date(selectedDate + 'T00:00:00');
-            dateObj.setHours(0, 0, 0, 0);
+    if (selectedDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas a data
 
-            let startHour = 9;
-            const endHour = 18;
+        const dateObj = new Date(selectedDate + 'T00:00:00'); // Garante que a data seja interpretada corretamente
+        dateObj.setHours(0, 0, 0, 0);
 
-            if (dateObj.getTime() === today.getTime()) {
-                const currentHour = new Date().getHours();
-                startHour = Math.max(startHour, currentHour + 1);
-            }
+        let startHour = 9;
+        const endHour = 18; // Supondo que o expediente vai até as 18:00
 
-            if (startHour <= endHour) {
-                for (let i = startHour; i <= endHour; i++) {
-                    const hour = String(i).padStart(2, '0');
-                    timeSelect.innerHTML += `<option value="${hour}:00">${hour}:00</option>`;
-                }
-                timeSelect.disabled = false;
-            }
+        // Se a data selecionada for hoje, ajuste a hora de início para a próxima hora cheia
+        if (dateObj.getTime() === today.getTime()) {
+            const currentHour = new Date().getHours();
+            startHour = Math.max(startHour, currentHour + 1);
         }
-    };
+
+        // Busca horários ocupados para a data selecionada
+        const response = await fetchData(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`);
+        let occupiedTimes = [];
+        if (response.success) {
+            occupiedTimes = response.occupied_times;
+        } else {
+            console.error('Erro ao buscar horários ocupados:', response.message);
+        }
+
+        let hasAvailableSlots = false;
+        if (startHour <= endHour) {
+            for (let i = startHour; i <= endHour; i++) {
+                const hour = String(i).padStart(2, '0');
+                const timeSlot = `${hour}:00`;
+
+                // Adiciona o horário APENAS se não estiver na lista de horários ocupados
+                if (!occupiedTimes.includes(timeSlot)) {
+                    const option = document.createElement('option');
+                    option.value = timeSlot;
+                    option.textContent = timeSlot;
+                    timeSelect.appendChild(option);
+                    hasAvailableSlots = true;
+                }
+            }
+            timeSelect.disabled = !hasAvailableSlots; // Desabilita se não houver slots
+            if (!hasAvailableSlots) {
+                timeSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+            }
+        } else {
+            timeSelect.innerHTML = '<option value="">Nenhum horário disponível</option>';
+        }
+    }
+};
+
 
     if (agendamentosTab && produtosTab && agendamentosSection && produtosSection) {
         const loggedInUser = getStoredData('loggedInUser');
@@ -307,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const date = dateInput.value;
             const time = timeSelect.value;
             const observations = observationsTextarea.value;
-            const userId = loggedInUser.id; // Pega o ID do usuário logado
+            const userId = loggedInUser.id;
 
             if (service && date && time && userId) {
                 const response = await fetchData('api/agendamentos.php', 'POST', {
@@ -334,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Funções para preencher dropdowns (chamadas no configadmin.js também)
         window.updateServiceDropdown = async () => {
             const serviceSelect = document.getElementById('service');
             if (serviceSelect) {
@@ -344,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     serviceSelect.innerHTML = '<option value="">Selecione um serviço</option>';
                     services.forEach(service => {
                         const option = document.createElement('option');
-                        option.value = service.nome; // Usamos o nome como valor
+                        option.value = service.nome;
                         option.textContent = `${service.nome} (R$ ${parseFloat(service.preco).toFixed(2).replace('.', ',')})`;
                         serviceSelect.appendChild(option);
                     });
@@ -354,10 +375,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Inicialização
         renderClientAppointments();
         renderClientProducts();
-        window.updateServiceDropdown(); // Carrega os serviços ao iniciar a página do cliente
+        window.updateServiceDropdown();
     }
 
     // --- Admin Dashboard Logic (admin.php) ---
@@ -385,13 +405,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const productImageInput = document.getElementById('productImage');
     const productImagePreview = document.getElementById('productImagePreview');
 
-    // Garante que o modal esteja oculto e a pré-visualização limpa ao carregar
     if (addProductModal) {
         addProductModal.style.display = 'none';
     }
     if (productImagePreview) {
-        productImagePreview.src = ''; // Limpa o src inicial
-        productImagePreview.style.display = 'none'; // Esconde a pré-visualização
+        productImagePreview.src = '';
+        productImagePreview.style.display = 'none';
     }
 
     if (productImageInput && productImagePreview) {
@@ -405,7 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Se o arquivo for deselecionado, esconde a pré-visualização
                 productImagePreview.src = '';
                 productImagePreview.style.display = 'none';
             }
@@ -425,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (productsResponse.success) {
-            const products = productsResponse.products;
+            const products = products.products;
             if (totalProductsCard) totalProductsCard.textContent = products.length;
             const totalRevenue = products.reduce((sum, product) => sum + (parseFloat(product.preco) || 0), 0);
             if (totalRevenueCard) totalRevenueCard.textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
@@ -517,33 +535,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
         window.editProduct = async (id) => {
-        // Primeiro, atualiza o dropdown de categorias
-        await window.updateProductCategoryDropdown(); // Garante que as opções estejam carregadas
+        await window.updateProductCategoryDropdown();
 
-        const response = await fetchData('api/produtos.php'); // Busca todos os produtos para encontrar o que editar
+        const response = await fetchData('api/produtos.php');
         if (response.success) {
             const products = response.products;
-            const productToEdit = products.find(product => product.id == id); // Comparação flexível
+            const productToEdit = products.find(product => product.id == id);
             if (productToEdit) {
                 if (productIdInput) productIdInput.value = productToEdit.id;
                 if (productNameInput) productNameInput.value = productToEdit.nome;
-                // Agora, atribui o valor da categoria APÓS o dropdown ser preenchido
                 if (productCategorySelect) productCategorySelect.value = productToEdit.nome_categoria;
                 if (productPriceInput) productPriceInput.value = parseFloat(productToEdit.preco).toFixed(2);
                 if (productDescriptionTextarea) productDescriptionTextarea.value = productToEdit.descricao;
 
                 if (productImagePreview) {
-                    // Se houver uma URL de imagem válida, exibe-a
                     if (productToEdit.url_imagem && productToEdit.url_imagem !== 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
                         productImagePreview.src = productToEdit.url_imagem;
                         productImagePreview.style.display = 'block';
                     } else {
-                        // Caso contrário, esconde a pré-visualização
                         productImagePreview.src = '';
                         productImagePreview.style.display = 'none';
                     }
                 }
-                if (productImageInput) productImageInput.value = ''; // Limpa o campo de arquivo para nova seleção
+                if (productImageInput) productImageInput.value = '';
 
                 if (saveProductBtn) saveProductBtn.textContent = 'Atualizar Produto';
                 if (addProductModal) addProductModal.style.display = 'flex';
@@ -589,16 +603,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
             if (openAddProductModalBtn) {
-        openAddProductModalBtn.addEventListener('click', async () => { // Adicionado 'async'
+        openAddProductModalBtn.addEventListener('click', async () => {
             if (productIdInput) productIdInput.value = '';
             if (productForm) productForm.reset();
             if (productImagePreview) {
-                productImagePreview.src = ''; // Limpa a pré-visualização
-                productImagePreview.style.display = 'none'; // Esconde a pré-visualização
+                productImagePreview.src = '';
+                productImagePreview.style.display = 'none';
             }
             if (saveProductBtn) saveProductBtn.textContent = 'Adicionar Produto';
             if (addProductModal) addProductModal.style.display = 'flex';
-            await window.updateProductCategoryDropdown(); // Garante que o dropdown de categorias esteja atualizado
+            await window.updateProductCategoryDropdown();
         });
     }
 
@@ -607,8 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (addProductModal) addProductModal.style.display = 'none';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = ''; // Limpa a pré-visualização
-                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
+                    productImagePreview.src = '';
+                    productImagePreview.style.display = 'none';
                 }
             });
         }
@@ -618,8 +632,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (addProductModal) addProductModal.style.display = 'none';
                 if (productForm) productForm.reset();
                 if (productImagePreview) {
-                    productImagePreview.src = ''; // Limpa a pré-visualização
-                    productImagePreview.style.display = 'none'; // Esconde a pré-visualização
+                    productImagePreview.src = '';
+                    productImagePreview.style.display = 'none';
                 }
             }
         });
@@ -628,11 +642,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const method = id ? 'PUT' : 'POST';
             const url = 'api/produtos.php';
 
-            let finalImageUrl = newImageUrl; // Se uma nova imagem foi carregada, use a Data URL
+            let finalImageUrl = newImageUrl;
 
-            // Se não houver nova imagem, e for uma edição, tente manter a imagem existente
             if (!newImageUrl && id) {
-                // Busca o produto novamente para obter a URL da imagem atual do banco de dados
                 const existingProductsResponse = await fetchData('api/produtos.php');
                 if (existingProductsResponse.success) {
                     const existingProduct = existingProductsResponse.products.find(p => p.id == id);
@@ -642,9 +654,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Se ainda não houver imagem, defina como null ou string vazia
             if (!finalImageUrl || finalImageUrl === 'https://via.placeholder.com/100/606060/FFFFFF?text=Sem+Imagem') {
-                finalImageUrl = null; // Ou '' dependendo de como você quer armazenar no DB
+                finalImageUrl = null;
             }
 
             const data = {
@@ -653,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 category: category,
                 price: price,
                 description: description,
-                imageUrl: finalImageUrl // Envia a URL final
+                imageUrl: finalImageUrl
             };
 
             const response = await fetchData(url, method, data);
@@ -685,19 +696,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const file = productImageInput.files[0];
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        // Passa a Data URL como newImageUrl
                         saveProductData(id, name, category, price, description, e.target.result);
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    // Se não há novo arquivo, passa null para newImageUrl,
-                    // a função saveProductData decidirá se mantém a URL existente.
                     saveProductData(id, name, category, price, description, null);
                 }
             });
         }
 
-        // Funções para preencher dropdowns (chamadas no configadmin.js também)
         window.updateProductCategoryDropdown = async () => {
             const productCategorySelect = document.getElementById('productCategory');
             if (productCategorySelect) {
@@ -707,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     productCategorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
                     categories.forEach(category => {
                         const option = document.createElement('option');
-                        option.value = category.nome; // Usamos o nome como valor
+                        option.value = category.nome;
                         option.textContent = category.nome;
                         productCategorySelect.appendChild(option);
                     });
@@ -717,10 +724,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Initial render for admin dashboard
         renderAdminAppointments();
         renderAdminProducts();
         updateAdminSummary();
-        window.updateProductCategoryDropdown(); // Carrega as categorias ao iniciar a página do admin
+        window.updateProductCategoryDropdown();
     }
 });
