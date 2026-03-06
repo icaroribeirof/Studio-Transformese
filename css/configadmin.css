@@ -16,3 +16,205 @@
 .config-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
 .config-card .info h3 { font-size: .92rem; font-weight: 700; }
 .config-card-actions { display: flex; gap: .4rem; }
+
+/* ═══════════════════════════════════════════════════════
+   CONFIGURAÇÃO DE HORÁRIOS
+═══════════════════════════════════════════════════════ */
+
+.horarios-grid {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.horario-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-xs);
+    transition: box-shadow var(--dur), border-color var(--dur),
+                opacity var(--dur), transform var(--dur) var(--ease);
+}
+.horario-row:hover { box-shadow: var(--shadow); border-color: var(--border-2); }
+.horario-row.fechado {
+    opacity: .55;
+}
+.horario-row.fechado .horario-inputs { pointer-events: none; }
+
+/* Toggle on/off */
+.toggle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .3rem;
+}
+
+.toggle {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface-3);
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--border-2);
+    cursor: pointer;
+    transition: background var(--dur), border-color var(--dur);
+}
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--text-3);
+    top: 50%; left: 2px;
+    transform: translateY(-50%);
+    transition: transform var(--dur) var(--spring), background var(--dur);
+}
+.toggle input:checked + .toggle-slider { background: var(--brand); border-color: var(--brand); }
+.toggle input:checked + .toggle-slider::before {
+    transform: translateY(-50%) translateX(18px);
+    background: #fff;
+}
+
+.toggle-label {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--text-3);
+}
+.toggle input:checked ~ .toggle-label { color: var(--brand); }
+
+/* Nome do dia */
+.horario-dia {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.horario-dia-nome {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.horario-dia-tipo {
+    font-size: .74rem;
+    color: var(--text-3);
+    font-weight: 500;
+}
+
+/* Inputs de hora */
+.horario-inputs {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+}
+.horario-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+.horario-input-group label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--text-3);
+}
+.horario-input-group input[type="time"],
+.horario-input-group select {
+    padding: .42rem .7rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    background: var(--surface-2);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    min-width: 90px;
+    transition: border-color var(--dur), box-shadow var(--dur);
+}
+.horario-input-group input[type="time"]:focus,
+.horario-input-group select:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-glow);
+    background: var(--surface);
+}
+.horario-sep {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--text-3);
+    margin-top: 1.2rem;
+}
+
+/* Barra de ação */
+.horarios-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.horarios-hint {
+    font-size: .82rem;
+    color: var(--text-3);
+    font-style: italic;
+}
+
+/* Preview de slots */
+.slots-preview {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    margin-top: 1.25rem;
+}
+.slots-preview-title {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-3);
+    margin-bottom: .75rem;
+}
+.slots-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+.slot-chip {
+    padding: .28rem .7rem;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-full);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text-2);
+}
+.slot-chip.ocupado {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger);
+    text-decoration: line-through;
+}
+
+@media (max-width: 640px) {
+    .horario-row { grid-template-columns: 44px 1fr; }
+    .horario-inputs { grid-column: 1 / -1; }
+    .horario-row { grid-template-rows: auto auto; }
+}

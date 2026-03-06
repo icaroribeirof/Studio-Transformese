@@ -85,3 +85,26 @@ CREATE TABLE IF NOT EXISTS agendamentos (
 -- Se você veio de uma versão anterior que salvava base64 no campo url_imagem,
 -- execute este comando para limpar os valores inválidos:
 -- UPDATE produtos SET url_imagem = NULL WHERE url_imagem LIKE 'data:%' OR LENGTH(url_imagem) > 500;
+
+-- ── CONFIGURAÇÃO DE HORÁRIOS ──────────────────────────────────────────────────
+-- dias_semana: 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sab
+CREATE TABLE IF NOT EXISTS horarios_config (
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    dia_semana  TINYINT      NOT NULL,          -- 0 a 6
+    hora_inicio TIME         NOT NULL,
+    hora_fim    TIME         NOT NULL,
+    intervalo   SMALLINT     NOT NULL DEFAULT 30, -- minutos entre slots
+    ativo       TINYINT(1)   NOT NULL DEFAULT 1,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_dia (dia_semana)
+) ENGINE=InnoDB;
+
+-- Horários padrão: Seg–Sex 09:00–18:00, Sábado 09:00–13:00
+INSERT IGNORE INTO horarios_config (dia_semana, hora_inicio, hora_fim, intervalo, ativo) VALUES
+    (1, '09:00:00', '18:00:00', 30, 1), -- Segunda
+    (2, '09:00:00', '18:00:00', 30, 1), -- Terça
+    (3, '09:00:00', '18:00:00', 30, 1), -- Quarta
+    (4, '09:00:00', '18:00:00', 30, 1), -- Quinta
+    (5, '09:00:00', '18:00:00', 30, 1), -- Sexta
+    (6, '09:00:00', '13:00:00', 30, 1), -- Sábado
+    (0, '00:00:00', '00:00:00', 30, 0); -- Domingo (fechado)

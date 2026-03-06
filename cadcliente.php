@@ -7,6 +7,9 @@ if (isset($_SESSION['user_id'])) { header('Location: cliente.php'); exit; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="ico/icone.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="ico/icone.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ico/icone-180.png">
     <title>Cadastro — Studio Transformese</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/login.css">
@@ -14,7 +17,7 @@ if (isset($_SESSION['user_id'])) { header('Location: cliente.php'); exit; }
 <body>
 <div class="login-page">
     <div class="login-branding">
-        <div class="branding-logo">✂️</div>
+        <img src="ico/icone.png" alt="Studio Transformese" class="branding-logo-img">
         <h1 class="branding-title">Studio Transformese</h1>
         <p class="branding-subtitle">Crie sua conta e comece a agendar seus atendimentos</p>
     </div>

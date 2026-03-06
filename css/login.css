@@ -44,6 +44,16 @@
     filter: drop-shadow(0 4px 16px rgba(0,0,0,.3));
 }
 
+.branding-logo-img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 20px rgba(0,0,0,.3));
+}
+
 .branding-title {
     font-size: 2rem;
     font-weight: 800;

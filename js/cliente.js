@@ -92,28 +92,54 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const horariosBase = [
-            '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-            '17:00', '17:30',
-        ];
+        // Busca configuração de horários + ocupados em paralelo
+        const [cfgRes, ocupadosRes] = await Promise.all([
+            fetchData('api/horarios.php'),
+            fetchData(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`),
+        ]);
 
-        // Remove horários passados se for hoje
-        let disponiveis = [...horariosBase];
-        if (selectedDate === today) {
-            const now  = new Date();
-            const agora = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            disponiveis = horariosBase.filter(h => h > agora);
-        }
-
-        // Busca horários ocupados no servidor
-        const response = await fetchData(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`);
-        if (!response.success) {
+        if (!cfgRes.success || !ocupadosRes.success) {
             timeSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
             return;
         }
 
-        const ocupados = response.occupied_times || [];
+        // Descobre dia da semana da data selecionada (0=Dom...6=Sab)
+        const partes = selectedDate.split('-');
+        const dateObj = new Date(partes[0], partes[1] - 1, partes[2]);
+        const diaSemana = dateObj.getDay();
+
+        const cfgDia = cfgRes.horarios[diaSemana];
+        if (!cfgDia || !cfgDia.ativo) {
+            timeSelect.innerHTML = '<option value="">Sem atendimento neste dia</option>';
+            return;
+        }
+
+        // Gera slots com base na configuração do dia
+        function gerarSlots(inicio, fim, intervalo) {
+            const slots = [];
+            let [h, m] = inicio.split(':').map(Number);
+            const [hf, mf] = fim.split(':').map(Number);
+            const fimMin = hf * 60 + mf;
+            while (true) {
+                const totalMin = h * 60 + m;
+                if (totalMin >= fimMin) break;
+                slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+                m += intervalo;
+                if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
+            }
+            return slots;
+        }
+
+        let disponiveis = gerarSlots(cfgDia.hora_inicio, cfgDia.hora_fim, cfgDia.intervalo);
+
+        // Remove horários passados se for hoje
+        if (selectedDate === today) {
+            const now   = new Date();
+            const agora = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            disponiveis = disponiveis.filter(h => h > agora);
+        }
+
+        const ocupados = ocupadosRes.occupied_times || [];
         const livres   = disponiveis.filter(h => !ocupados.includes(h));
 
         if (livres.length === 0) {

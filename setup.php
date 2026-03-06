@@ -48,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$admin_exists) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="ico/icone.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="ico/icone.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ico/icone-180.png">
     <title>Setup - Studio Transformese</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/login.css">
