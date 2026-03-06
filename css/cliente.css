@@ -1,0 +1,186 @@
+/* css/cliente.css — cliente.php */
+
+/* ═══════════════════════════════════════════════════════
+   FORMULÁRIO DE AGENDAMENTO
+═══════════════════════════════════════════════════════ */
+.booking-section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin-bottom: .3rem;
+}
+.booking-section-desc {
+    font-size: .84rem;
+    color: var(--text-2);
+    margin-bottom: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD DE AGENDAMENTO DO CLIENTE
+═══════════════════════════════════════════════════════ */
+.appointment-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: .6rem;
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+}
+.appointment-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
+
+.appointment-card .info h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .2rem;
+}
+.appointment-card .info p { font-size: .82rem; color: var(--text-2); }
+
+.appointment-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: .4rem;
+    flex-wrap: wrap;
+}
+.appointment-meta-item {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .8rem;
+    color: var(--text-2);
+    font-weight: 500;
+}
+
+.appointment-obs {
+    font-size: .8rem;
+    color: var(--text-3);
+    font-style: italic;
+    margin-top: .3rem;
+}
+
+.appointment-actions { display: flex; gap: .4rem; flex-shrink: 0; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════════════
+   GRID DE PRODUTOS (visão cliente)
+═══════════════════════════════════════════════════════ */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+    display: flex;
+    flex-direction: column;
+}
+.product-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-2); transform: translateY(-3px); }
+
+.product-card-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: var(--surface-3);
+    display: block;
+}
+
+.product-card-body {
+    padding: 1rem 1.1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.product-card-name {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+}
+.product-card-desc {
+    font-size: .8rem;
+    color: var(--text-2);
+    line-height: 1.5;
+    flex: 1;
+}
+.product-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: .75rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--border);
+}
+.product-card-price {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--brand);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARRINHO
+═══════════════════════════════════════════════════════ */
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .65rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: .75rem;
+}
+.cart-item:last-child { border-bottom: none; }
+
+.cart-item-name { font-size: .88rem; font-weight: 600; color: var(--text); flex: 1; }
+.cart-item-price { font-size: .88rem; font-weight: 700; color: var(--brand); flex-shrink: 0; }
+
+.btn-remove-cart {
+    width: 24px; height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--danger-bg);
+    border: none;
+    color: var(--danger);
+    font-size: .8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--dur), transform var(--dur) var(--spring);
+}
+.btn-remove-cart:hover { background: var(--danger); color: #fff; transform: scale(1.15); }
+
+.cart-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .9rem 0 0;
+    font-weight: 800;
+    color: var(--text);
+    font-size: .95rem;
+}
+.cart-total-value { color: var(--brand); font-size: 1.1rem; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVO
+═══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .products-grid { grid-template-columns: 1fr 1fr; }
+    .appointment-card { flex-direction: column; align-items: flex-start; }
+    .appointment-actions { width: 100%; justify-content: flex-end; }
+}
+@media (max-width: 400px) {
+    .products-grid { grid-template-columns: 1fr; }
+}

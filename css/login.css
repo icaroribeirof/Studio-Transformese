@@ -1,0 +1,241 @@
+/* css/login.css — index.php e cadcliente.php */
+
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/* ── PAINEL ESQUERDO (branding) ── */
+.login-branding {
+    background: linear-gradient(155deg, #5b21b6 0%, #7c3aed 45%, #a855f7 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ornamentos decorativos */
+.login-branding::before {
+    content: '';
+    position: absolute;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    border: 80px solid rgba(255,255,255,.06);
+    top: -100px; right: -100px;
+}
+.login-branding::after {
+    content: '';
+    position: absolute;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 60px solid rgba(255,255,255,.05);
+    bottom: -60px; left: -80px;
+}
+
+.branding-logo {
+    font-size: 2.8rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,.3));
+}
+
+.branding-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    letter-spacing: -.03em;
+    line-height: 1.2;
+    margin-bottom: .75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.branding-subtitle {
+    color: rgba(255,255,255,.7);
+    text-align: center;
+    font-size: .95rem;
+    line-height: 1.6;
+    max-width: 280px;
+    position: relative;
+    z-index: 1;
+}
+
+.branding-features {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.branding-feature {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    color: rgba(255,255,255,.85);
+    font-size: .88rem;
+    font-weight: 500;
+}
+.branding-feature-icon {
+    width: 30px; height: 30px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    flex-shrink: 0;
+}
+
+/* ── PAINEL DIREITO (formulário) ── */
+.login-form-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+    background: var(--bg);
+    background-image: radial-gradient(circle, var(--bg-dot) 1px, transparent 1px);
+    background-size: 28px 28px;
+    position: relative;
+}
+
+.login-theme-toggle {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 36px; height: 36px;
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--border-2);
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--dur), border-color var(--dur),
+                transform var(--dur) var(--spring);
+}
+.login-theme-toggle:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+    transform: rotate(20deg) scale(1.1);
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box-header {
+    margin-bottom: 2rem;
+}
+.login-box-header h2 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--text);
+    margin-bottom: .35rem;
+}
+.login-box-header p {
+    color: var(--text-2);
+    font-size: .9rem;
+}
+
+/* Seletor de perfil */
+.role-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    margin-bottom: 1.75rem;
+}
+
+.role-button {
+    padding: .75rem 1rem;
+    border: 1.5px solid var(--border-2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-2);
+    font-family: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    transition: border-color var(--dur), background var(--dur), color var(--dur),
+                box-shadow var(--dur), transform var(--dur) var(--spring);
+}
+.role-button:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-1px); }
+.role-button.active {
+    border-color: var(--brand);
+    background: var(--brand);
+    color: #fff;
+    box-shadow: var(--brand-shadow);
+}
+
+/* Botão de login */
+.btn-login {
+    width: 100%;
+    padding: .8rem 1.5rem;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: .92rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .01em;
+    transition: background var(--dur), box-shadow var(--dur),
+                transform var(--dur) var(--spring);
+    margin-top: .25rem;
+}
+.btn-login:hover    { background: var(--brand-hover); box-shadow: var(--brand-shadow); transform: translateY(-1px); }
+.btn-login:active   { transform: translateY(0); box-shadow: none; }
+.btn-login:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.login-footer {
+    margin-top: 1.75rem;
+    text-align: center;
+    font-size: .88rem;
+    color: var(--text-2);
+}
+.login-footer a { font-weight: 600; }
+
+.login-divider {
+    height: 1px;
+    background: var(--border-2);
+    margin: 1.5rem 0;
+    position: relative;
+}
+.login-divider span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg);
+    padding: 0 .75rem;
+    color: var(--text-3);
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+/* ── RESPONSIVO ── */
+@media (max-width: 768px) {
+    .login-page { grid-template-columns: 1fr; }
+    .login-branding { display: none; }
+    .login-form-panel { padding: 2.5rem 1.5rem; min-height: 100vh; justify-content: center; }
+}

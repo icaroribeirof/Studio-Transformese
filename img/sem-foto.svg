@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70">
+  <rect width="70" height="70" rx="8" fill="#E5E7EB"/>
+  <rect x="20" y="18" width="30" height="22" rx="3" fill="#9CA3AF"/>
+  <circle cx="35" cy="28" r="6" fill="#D1D5DB"/>
+  <path d="M20 40 l8-10 7 8 5-6 10 8z" fill="#D1D5DB"/>
+  <text x="35" y="58" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#9CA3AF">Sem foto</text>
+</svg>

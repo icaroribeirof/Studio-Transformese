@@ -1,0 +1,18 @@
+/* css/configadmin.css — configadmin.php */
+
+.config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: .6rem;
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+}
+.config-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
+.config-card .info h3 { font-size: .92rem; font-weight: 700; }
+.config-card-actions { display: flex; gap: .4rem; }

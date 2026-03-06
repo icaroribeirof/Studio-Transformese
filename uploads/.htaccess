@@ -1,0 +1,16 @@
+# Bloqueia execução de scripts nesta pasta (segurança contra upload malicioso)
+
+# Desativa execução de PHP
+php_flag engine off
+
+# Bloqueia acesso direto a qualquer arquivo que não seja imagem
+<FilesMatch "(?i)\.(php|php3|php4|php5|php7|phtml|phar|pl|py|cgi|sh|rb|exe|jsp|asp|aspx)$">
+    Require all denied
+</FilesMatch>
+
+# Garante que imagens sejam servidas como conteúdo estático
+<FilesMatch "(?i)\.(jpg|jpeg|png|gif|webp|svg)$">
+    Require all granted
+</FilesMatch>
+
+Options -ExecCGI -Indexes

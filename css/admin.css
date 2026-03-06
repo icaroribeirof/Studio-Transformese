@@ -1,0 +1,196 @@
+/* css/admin.css — admin.php */
+
+/* ═══════════════════════════════════════════════════════
+   CARDS DE MÉTRICAS
+═══════════════════════════════════════════════════════ */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.4rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow var(--dur), transform var(--dur) var(--ease);
+}
+.metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand), #a855f7);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.metric-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--radius-sm);
+    background: var(--brand-light);
+    color: var(--brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.metric-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--text-3);
+    margin-bottom: .3rem;
+}
+
+.metric-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: var(--text);
+    line-height: 1;
+}
+
+.metric-value.brand { color: var(--brand); }
+
+/* ═══════════════════════════════════════════════════════
+   CARD DE AGENDAMENTO
+═══════════════════════════════════════════════════════ */
+.appointment-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: .6rem;
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+}
+.appointment-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
+
+.appointment-card .info h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .2rem;
+}
+.appointment-card .info p { font-size: .82rem; color: var(--text-2); }
+
+.appointment-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: .4rem;
+    flex-wrap: wrap;
+}
+.appointment-meta-item {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .8rem;
+    color: var(--text-2);
+    font-weight: 500;
+}
+
+.appointment-obs {
+    font-size: .8rem;
+    color: var(--text-3);
+    font-style: italic;
+    margin-top: .3rem;
+}
+
+.appointment-actions { display: flex; gap: .4rem; flex-shrink: 0; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════════════════
+   CARD DE PRODUTO (admin)
+═══════════════════════════════════════════════════════ */
+.product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: .6rem;
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+}
+.product-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
+
+.product-card img {
+    width: 64px; height: 64px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+}
+
+.product-card .info { flex: 1; min-width: 0; }
+.product-card .info h3 { font-size: .92rem; font-weight: 700; color: var(--text); }
+.product-card .info p  { font-size: .8rem; color: var(--text-2); margin-top: .1rem; }
+.product-card .price   { font-weight: 800; color: var(--brand); font-size: .95rem; margin-top: .2rem; }
+
+.product-actions { display: flex; gap: .4rem; flex-shrink: 0; }
+
+/* ── Preview imagem no modal ── */
+#productImagePreview {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-top: .75rem;
+    border: 1px solid var(--border-2);
+    background: var(--surface-2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD DE SERVIÇO
+═══════════════════════════════════════════════════════ */
+.service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-xs);
+    margin-bottom: .6rem;
+    transition: box-shadow var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+}
+.service-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-1px); }
+
+.service-card .info h3 { font-size: .92rem; font-weight: 700; }
+.service-card .info p  { font-size: .8rem; color: var(--text-2); margin-top: .1rem; }
+.service-card .price   { font-weight: 800; color: var(--brand); }
+.service-card .service-actions { display: flex; gap: .4rem; }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVO
+═══════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+    .summary-cards { grid-template-columns: 1fr 1fr; }
+    .appointment-card,
+    .product-card,
+    .service-card { flex-direction: column; align-items: flex-start; }
+    .appointment-actions,
+    .product-actions,
+    .service-card .service-actions { width: 100%; justify-content: flex-end; }
+}
