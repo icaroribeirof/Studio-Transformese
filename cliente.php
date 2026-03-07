@@ -18,6 +18,7 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
     <link rel="stylesheet" href="css/cliente.css">
 </head>
 <body>
+
 <header class="dashboard-header">
     <div class="header-content">
         <div class="header-brand">
@@ -28,7 +29,11 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
             Olá, <strong><?= $user_name ?></strong> 👋
         </div>
         <div class="header-actions">
-            <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Alternar tema">🌙</button>
+            <button class="cart-header-btn" id="openCartBtn" title="Ver carrinho">
+                <span class="cart-header-icon">🛒</span>
+                <span class="cart-badge hidden" id="cartBadge">0</span>
+            </button>
+            <button class="theme-toggle" id="themeToggle" title="Alternar tema">🌙</button>
             <button class="btn-logout" onclick="logout()">Sair</button>
         </div>
     </div>
@@ -49,13 +54,10 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
                 <div class="section-subtitle">Escolha o serviço, data e horário</div>
             </div>
         </div>
-
         <div class="form-grid">
             <div class="form-group">
                 <label for="service">Serviço</label>
-                <select id="service">
-                    <option value="">Carregando...</option>
-                </select>
+                <select id="service"><option value="">Carregando...</option></select>
             </div>
             <div class="form-group">
                 <label for="date">Data</label>
@@ -69,7 +71,7 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
             </div>
             <div class="form-group full-width">
                 <label for="observations">Observações</label>
-                <textarea id="observations" placeholder="Alguma preferência especial? Ex: comprimento, estilo..."></textarea>
+                <textarea id="observations" placeholder="Alguma preferência especial?"></textarea>
             </div>
             <div class="full-width">
                 <button class="btn-primary" id="scheduleAppointmentBtn" style="width:100%">
@@ -98,33 +100,69 @@ $user_name = htmlspecialchars($_SESSION['user_name']);
                 <div class="section-title">Produtos Disponíveis</div>
                 <div class="section-subtitle">Conheça nossos produtos para cuidados capilares</div>
             </div>
-            <button class="btn-primary" id="openCartBtn">🛒 Ver Carrinho (<span id="cartCount">0</span>)</button>
         </div>
         <div id="availableProducts" class="products-grid"></div>
     </div>
 </div>
 
+<!-- Toast de feedback -->
+<div id="cartToast" class="cart-toast hidden">
+    <span class="cart-toast-icon">✅</span>
+    <span id="cartToastMsg">Produto adicionado!</span>
+</div>
+
 <!-- Modal Carrinho -->
 <div id="cartModal" class="modal" style="display:none;">
-    <div class="modal-content">
+    <div class="modal-content modal-cart">
         <div class="modal-header">
-            <h2>🛒 Carrinho</h2>
+            <div>
+                <h2>🛒 Carrinho</h2>
+                <p class="cart-subtitle" id="cartSubtitle">0 itens</p>
+            </div>
             <button class="close-button" id="closeCartModal" aria-label="Fechar">✕</button>
         </div>
         <div class="modal-body">
-            <div id="cartItems"></div>
-            <div class="empty-state" id="cartEmpty">
-                <div class="empty-state-icon">🛒</div>
-                <span>Seu carrinho está vazio.</span>
+
+            <!-- Estado vazio -->
+            <div class="cart-empty-state" id="cartEmpty">
+                <div class="cart-empty-icon">🛒</div>
+                <p class="cart-empty-title">Carrinho vazio</p>
+                <p class="cart-empty-desc">Adicione produtos para continuar</p>
             </div>
-            <div id="cartTotalSection" style="display:none">
-                <div class="cart-total-row">
-                    <span>Total</span>
-                    <span class="cart-total-value" id="cartTotalValue">R$ 0,00</span>
+
+            <!-- Lista de itens -->
+            <div id="cartItemsList" class="hidden"></div>
+
+            <!-- Rodapé com total e checkout -->
+            <div id="cartFooter" class="cart-footer hidden">
+                <div class="cart-summary">
+                    <div class="cart-summary-row">
+                        <span>Subtotal (<span id="cartItemCount">0</span> itens)</span>
+                        <span id="cartSubtotalValue">R$ 0,00</span>
+                    </div>
                 </div>
-                <button class="btn-primary" id="checkoutBtn" style="width:100%;margin-top:1rem">
-                    Finalizar Pedido
+                <button class="btn-checkout" id="checkoutBtn">
+                    Finalizar Pedido · <span id="cartTotalValue">R$ 0,00</span>
                 </button>
+                <button class="btn-clear-cart" id="clearCartBtn">Esvaziar carrinho</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmação de Pedido -->
+<div id="checkoutModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirmar Pedido</h2>
+            <button class="close-button" id="closeCheckoutModal" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="checkoutSummary"></div>
+            <div class="checkout-actions">
+                <button class="btn-checkout" id="confirmOrderBtn">✅ Confirmar Pedido</button>
+                <button class="btn-ghost" id="cancelOrderBtn" style="width:100%;margin-top:.5rem">Voltar ao Carrinho</button>
             </div>
         </div>
     </div>

@@ -1,17 +1,14 @@
-// js/cliente.js
-// Lógica exclusiva do painel do cliente (cliente.php)
+// js/cliente.js — Painel do cliente
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Dados da sessão injetados pelo PHP de forma segura
     const user = window.SESSION_USER;
 
-    // Elementos de navegação
-    const agendamentosTab    = document.getElementById('agendamentosTab');
-    const produtosTab        = document.getElementById('produtosTab');
+    // ── ELEMENTOS ─────────────────────────────────────────────────────────────
+    const agendamentosTab     = document.getElementById('agendamentosTab');
+    const produtosTab         = document.getElementById('produtosTab');
     const agendamentosSection = document.getElementById('agendamentosSection');
-    const produtosSection    = document.getElementById('produtosSection');
+    const produtosSection     = document.getElementById('produtosSection');
 
-    // Elementos do formulário de agendamento
     const serviceSelect          = document.getElementById('service');
     const dateInput              = document.getElementById('date');
     const timeSelect             = document.getElementById('time');
@@ -19,11 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const scheduleAppointmentBtn = document.getElementById('scheduleAppointmentBtn');
     const appointmentsList       = document.getElementById('appointmentsList');
     const noAppointmentsMessage  = document.getElementById('noAppointments');
+    const availableProductsDiv   = document.getElementById('availableProducts');
 
-    // Elementos de produtos
-    const availableProductsDiv = document.getElementById('availableProducts');
-
-    // Carrinho (em memória — persistência via banco futura)
+    // Carrinho — array de { id, name, price, qty, img }
     let cart = [];
 
     // ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────
@@ -32,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActiveTab([agendamentosTab, produtosTab], 'agendamentosTab');
         renderClientAppointments();
     });
-
     produtosTab.addEventListener('click', () => {
         showSection([agendamentosSection, produtosSection], 'produtosSection');
         updateActiveTab([agendamentosTab, produtosTab], 'produtosTab');
@@ -85,14 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Bloqueia datas passadas
         const today = new Date().toISOString().split('T')[0];
         if (selectedDate < today) {
             timeSelect.innerHTML = '<option value="">Data inválida</option>';
             return;
         }
 
-        // Busca configuração de horários + ocupados em paralelo
         const [cfgRes, ocupadosRes] = await Promise.all([
             fetchData('api/horarios.php'),
             fetchData(`api/agendamentos.php?action=get_available_times&date=${selectedDate}`),
@@ -103,26 +95,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Descobre dia da semana da data selecionada (0=Dom...6=Sab)
-        const partes = selectedDate.split('-');
-        const dateObj = new Date(partes[0], partes[1] - 1, partes[2]);
+        const partes    = selectedDate.split('-');
+        const dateObj   = new Date(partes[0], partes[1] - 1, partes[2]);
         const diaSemana = dateObj.getDay();
+        const cfgDia    = cfgRes.horarios[diaSemana];
 
-        const cfgDia = cfgRes.horarios[diaSemana];
         if (!cfgDia || !cfgDia.ativo) {
             timeSelect.innerHTML = '<option value="">Sem atendimento neste dia</option>';
             return;
         }
 
-        // Gera slots com base na configuração do dia
         function gerarSlots(inicio, fim, intervalo) {
             const slots = [];
             let [h, m] = inicio.split(':').map(Number);
             const [hf, mf] = fim.split(':').map(Number);
             const fimMin = hf * 60 + mf;
             while (true) {
-                const totalMin = h * 60 + m;
-                if (totalMin >= fimMin) break;
+                if (h * 60 + m >= fimMin) break;
                 slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
                 m += intervalo;
                 if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
@@ -132,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let disponiveis = gerarSlots(cfgDia.hora_inicio, cfgDia.hora_fim, cfgDia.intervalo);
 
-        // Remove horários passados se for hoje
         if (selectedDate === today) {
             const now   = new Date();
             const agora = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -166,16 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
         scheduleAppointmentBtn.disabled    = true;
         scheduleAppointmentBtn.textContent = '⏳ Agendando...';
 
-        const response = await fetchData('api/agendamentos.php', 'POST', {
-            service, date, time, observations,
-        });
+        const response = await fetchData('api/agendamentos.php', 'POST', { service, date, time, observations });
 
         if (response.success) {
-            alert('Agendamento realizado com sucesso!');
-            serviceSelect.value     = '';
-            dateInput.value         = '';
-            timeSelect.innerHTML    = '<option value="">Selecione uma data primeiro</option>';
-            timeSelect.disabled     = true;
+            showToast('Agendamento confirmado! ✅', 'success');
+            serviceSelect.value        = '';
+            dateInput.value            = '';
+            timeSelect.innerHTML       = '<option value="">Selecione uma data primeiro</option>';
+            timeSelect.disabled        = true;
             observationsTextarea.value = '';
             renderClientAppointments();
         } else {
@@ -202,8 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        availableProductsDiv.innerHTML = products.map(p => `
-            <div class="product-card">
+        availableProductsDiv.innerHTML = products.map(p => {
+            const inCart = cart.find(i => i.id === String(p.id));
+            const qty    = inCart ? inCart.qty : 0;
+            return `
+            <div class="product-card" data-id="${p.id}">
                 <img class="product-card-image"
                      src="${p.url_imagem ? escapeHtml(p.url_imagem) : 'img/sem-foto.svg'}"
                      alt="${escapeHtml(p.nome)}" loading="lazy">
@@ -213,74 +202,307 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="product-card-desc">${escapeHtml(p.descricao || '')}</div>
                     <div class="product-card-footer">
                         <span class="product-card-price">${formatCurrency(p.preco)}</span>
-                        <button class="btn btn-buy" data-id="${p.id}" data-name="${escapeHtml(p.nome)}" data-price="${p.preco}">
-                            🛒 Comprar
-                        </button>
+                        <div class="product-card-actions">
+                            ${qty > 0
+                                ? `<div class="qty-control">
+                                       <button class="qty-btn qty-minus" data-id="${p.id}" aria-label="Remover um">−</button>
+                                       <span class="qty-value">${qty}</span>
+                                       <button class="qty-btn qty-plus"
+                                               data-id="${p.id}"
+                                               data-name="${escapeHtml(p.nome)}"
+                                               data-price="${p.preco}"
+                                               data-img="${p.url_imagem ? escapeHtml(p.url_imagem) : 'img/sem-foto.svg'}"
+                                               aria-label="Adicionar mais">+</button>
+                                   </div>`
+                                : `<button class="btn-add-cart"
+                                           data-id="${p.id}"
+                                           data-name="${escapeHtml(p.nome)}"
+                                           data-price="${p.preco}"
+                                           data-img="${p.url_imagem ? escapeHtml(p.url_imagem) : 'img/sem-foto.svg'}">
+                                       + Adicionar
+                                   </button>`
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
 
-        availableProductsDiv.querySelectorAll('.btn-buy').forEach(btn => {
-            btn.addEventListener('click', () => {
-                addToCart(btn.dataset.id, btn.dataset.name, btn.dataset.price);
-            });
+        wireProductCardEvents(availableProductsDiv);
+    }
+
+    function wireProductCardEvents(container) {
+        container.querySelectorAll('.btn-add-cart').forEach(btn => {
+            btn.addEventListener('click', () =>
+                addToCart(btn.dataset.id, btn.dataset.name, btn.dataset.price, btn.dataset.img));
+        });
+        container.querySelectorAll('.qty-plus').forEach(btn => {
+            btn.addEventListener('click', () =>
+                addToCart(btn.dataset.id, btn.dataset.name, btn.dataset.price, btn.dataset.img));
+        });
+        container.querySelectorAll('.qty-minus').forEach(btn => {
+            btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
         });
     }
 
-    // ── CARRINHO ──────────────────────────────────────────────────────────────
-    function updateCartCount() {
-        const countEl = document.getElementById('cartCount');
-        if (countEl) countEl.textContent = cart.length;
-    }
-
-    function addToCart(id, name, price) {
-        const existing = cart.find(item => item.id === id);
+    // ── CARRINHO — LÓGICA ─────────────────────────────────────────────────────
+    function addToCart(id, name, price, img) {
+        const existing = cart.find(item => item.id === String(id));
         if (existing) {
             existing.qty++;
         } else {
-            cart.push({ id, name, price: parseFloat(price), qty: 1 });
-        }
-        alert(`"${name}" adicionado ao carrinho!`);
-        renderCart();
-    }
-
-    function renderCart() {
-        const cartModal   = document.getElementById('cartModal');
-        const cartItems   = document.getElementById('cartItems');
-        const cartEmpty   = document.getElementById('cartEmpty');
-        const cartTotal   = document.getElementById('cartTotalSection');
-        const totalValue  = document.getElementById('cartTotalValue');
-
-        if (cart.length === 0) {
-            cartItems.innerHTML = '';
-            cartEmpty.style.display = 'block';
-            cartTotal.style.display = 'none';
-        } else {
-            cartEmpty.style.display = 'none';
-            cartTotal.style.display = 'block';
-            cartItems.innerHTML = cart.map((item, idx) => `
-                <div class="cart-item">
-                    <span>${escapeHtml(item.name)} x${item.qty}</span>
-                    <span>${formatCurrency(item.price * item.qty)}</span>
-                    <button class="btn-remove-cart" data-idx="${idx}">✕</button>
-                </div>
-            `).join('');
-            const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-            totalValue.textContent = total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-            cartItems.querySelectorAll('.btn-remove-cart').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    cart.splice(parseInt(btn.dataset.idx), 1);
-                    renderCart();
-                });
+            cart.push({
+                id:    String(id),
+                name,
+                price: parseFloat(price),
+                qty:   1,
+                img:   img || 'img/sem-foto.svg'
             });
         }
+        updateCartBadge();
+        refreshProductCard(id);
+        showToast(`${name} adicionado ao carrinho 🛒`);
     }
 
-    document.getElementById('closeCartModal')?.addEventListener('click', () => {
+    function removeFromCart(id) {
+        const idx = cart.findIndex(item => item.id === String(id));
+        if (idx === -1) return;
+        if (cart[idx].qty > 1) {
+            cart[idx].qty--;
+        } else {
+            cart.splice(idx, 1);
+        }
+        updateCartBadge();
+        refreshProductCard(id);
+        if (document.getElementById('cartModal').style.display !== 'none') {
+            renderCartModal();
+        }
+    }
+
+    function clearCart() {
+        cart = [];
+        updateCartBadge();
+        // Re-renderiza grid para repor os botões "Adicionar"
+        if (produtosSection && !produtosSection.classList.contains('hidden')) {
+            renderClientProducts();
+        }
+    }
+
+    // Atualiza apenas o card afetado sem re-renderizar a grid
+    function refreshProductCard(id) {
+        const card = availableProductsDiv.querySelector(`.product-card[data-id="${id}"]`);
+        if (!card) return;
+
+        const item    = cart.find(i => i.id === String(id));
+        const qty     = item ? item.qty : 0;
+        const actions = card.querySelector('.product-card-actions');
+        if (!actions) return;
+
+        const srcBtn  = card.querySelector('[data-name]');
+        const name    = srcBtn?.dataset.name  || '';
+        const price   = srcBtn?.dataset.price || 0;
+        const img     = srcBtn?.dataset.img   || 'img/sem-foto.svg';
+
+        if (qty > 0) {
+            actions.innerHTML = `
+                <div class="qty-control">
+                    <button class="qty-btn qty-minus" data-id="${id}" aria-label="Remover um">−</button>
+                    <span class="qty-value">${qty}</span>
+                    <button class="qty-btn qty-plus"
+                            data-id="${id}" data-name="${escapeHtml(name)}"
+                            data-price="${price}" data-img="${escapeHtml(img)}"
+                            aria-label="Adicionar mais">+</button>
+                </div>`;
+        } else {
+            actions.innerHTML = `
+                <button class="btn-add-cart"
+                        data-id="${id}" data-name="${escapeHtml(name)}"
+                        data-price="${price}" data-img="${escapeHtml(img)}">
+                    + Adicionar
+                </button>`;
+        }
+
+        wireProductCardEvents(actions);
+    }
+
+    // Badge do header
+    function updateCartBadge() {
+        const badge = document.getElementById('cartBadge');
+        if (!badge) return;
+        const total = cart.reduce((sum, i) => sum + i.qty, 0);
+        badge.textContent = total;
+        badge.classList.toggle('hidden', total === 0);
+        if (total > 0) {
+            badge.classList.add('badge-pop');
+            setTimeout(() => badge.classList.remove('badge-pop'), 350);
+        }
+    }
+
+    // ── MODAL DO CARRINHO ─────────────────────────────────────────────────────
+    function renderCartModal() {
+        const cartEmpty     = document.getElementById('cartEmpty');
+        const cartItemsList = document.getElementById('cartItemsList');
+        const cartFooter    = document.getElementById('cartFooter');
+        const cartSubtitle  = document.getElementById('cartSubtitle');
+        const cartItemCount = document.getElementById('cartItemCount');
+        const subtotalEl    = document.getElementById('cartSubtotalValue');
+        const totalEl       = document.getElementById('cartTotalValue');
+
+        const totalQty   = cart.reduce((s, i) => s + i.qty, 0);
+        const totalPrice = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+        cartSubtitle.textContent = totalQty === 1 ? '1 item' : `${totalQty} itens`;
+
+        if (cart.length === 0) {
+            cartEmpty.classList.remove('hidden');
+            cartItemsList.classList.add('hidden');
+            cartFooter.classList.add('hidden');
+            return;
+        }
+
+        cartEmpty.classList.add('hidden');
+        cartItemsList.classList.remove('hidden');
+        cartFooter.classList.remove('hidden');
+
+        cartItemsList.innerHTML = cart.map(item => `
+            <div class="cart-item" data-id="${item.id}">
+                <img class="cart-item-img"
+                     src="${escapeHtml(item.img)}"
+                     alt="${escapeHtml(item.name)}">
+                <div class="cart-item-info">
+                    <span class="cart-item-name">${escapeHtml(item.name)}</span>
+                    <span class="cart-item-unit">${formatCurrency(item.price)} / un.</span>
+                </div>
+                <div class="cart-qty-control">
+                    <button class="cart-qty-btn cart-qty-minus" data-id="${item.id}" aria-label="Remover um">−</button>
+                    <span class="cart-qty-value">${item.qty}</span>
+                    <button class="cart-qty-btn cart-qty-plus"
+                            data-id="${item.id}"
+                            data-name="${escapeHtml(item.name)}"
+                            data-price="${item.price}"
+                            data-img="${escapeHtml(item.img)}"
+                            aria-label="Adicionar mais">+</button>
+                </div>
+                <span class="cart-item-total">${formatCurrency(item.price * item.qty)}</span>
+                <button class="cart-item-remove" data-id="${item.id}" aria-label="Remover item">✕</button>
+            </div>
+        `).join('');
+
+        cartItemsList.querySelectorAll('.cart-qty-plus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                addToCart(btn.dataset.id, btn.dataset.name, btn.dataset.price, btn.dataset.img);
+                renderCartModal();
+            });
+        });
+        cartItemsList.querySelectorAll('.cart-qty-minus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                removeFromCart(btn.dataset.id);
+                renderCartModal();
+            });
+        });
+        cartItemsList.querySelectorAll('.cart-item-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                cart = cart.filter(i => i.id !== btn.dataset.id);
+                updateCartBadge();
+                refreshProductCard(btn.dataset.id);
+                renderCartModal();
+            });
+        });
+
+        cartItemCount.textContent = totalQty;
+        subtotalEl.textContent    = formatCurrency(totalPrice);
+        totalEl.textContent       = formatCurrency(totalPrice);
+    }
+
+    // Abre modal do carrinho
+    document.getElementById('openCartBtn').addEventListener('click', () => {
+        renderCartModal();
+        document.getElementById('cartModal').style.display = 'flex';
+    });
+
+    // Fecha modal do carrinho
+    document.getElementById('closeCartModal').addEventListener('click', () => {
         document.getElementById('cartModal').style.display = 'none';
     });
+    document.getElementById('cartModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('cartModal'))
+            document.getElementById('cartModal').style.display = 'none';
+    });
+
+    // Esvaziar carrinho
+    document.getElementById('clearCartBtn').addEventListener('click', () => {
+        if (!confirm('Esvaziar o carrinho?')) return;
+        clearCart();
+        renderCartModal();
+    });
+
+    // ── CHECKOUT ──────────────────────────────────────────────────────────────
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+        if (cart.length === 0) return;
+
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+        document.getElementById('checkoutSummary').innerHTML = `
+            <div class="checkout-items">
+                ${cart.map(item => `
+                    <div class="checkout-item">
+                        <img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}" class="checkout-item-img">
+                        <div class="checkout-item-info">
+                            <span class="checkout-item-name">${escapeHtml(item.name)}</span>
+                            <span class="checkout-item-qty">Qtd: ${item.qty}</span>
+                        </div>
+                        <span class="checkout-item-price">${formatCurrency(item.price * item.qty)}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="checkout-total-row">
+                <span>Total</span>
+                <span class="checkout-total-value">${formatCurrency(total)}</span>
+            </div>
+            <p class="checkout-info">
+                ℹ️ Seu pedido será anotado e a equipe do studio entrará em contato para combinar a entrega ou retirada.
+            </p>`;
+
+        document.getElementById('cartModal').style.display     = 'none';
+        document.getElementById('checkoutModal').style.display = 'flex';
+    });
+
+    document.getElementById('closeCheckoutModal').addEventListener('click', () => {
+        document.getElementById('checkoutModal').style.display = 'none';
+        document.getElementById('cartModal').style.display     = 'flex';
+    });
+    document.getElementById('cancelOrderBtn').addEventListener('click', () => {
+        document.getElementById('checkoutModal').style.display = 'none';
+        document.getElementById('cartModal').style.display     = 'flex';
+    });
+
+    document.getElementById('confirmOrderBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('confirmOrderBtn');
+        btn.disabled    = true;
+        btn.textContent = '⏳ Processando...';
+
+        await new Promise(r => setTimeout(r, 900));
+
+        document.getElementById('checkoutModal').style.display = 'none';
+        clearCart();
+        showToast('Pedido realizado com sucesso! 🎉', 'success');
+
+        btn.disabled    = false;
+        btn.textContent = '✅ Confirmar Pedido';
+    });
+
+    // ── TOAST ─────────────────────────────────────────────────────────────────
+    let toastTimer = null;
+    function showToast(msg, type = 'default') {
+        const toast = document.getElementById('cartToast');
+        const msgEl = document.getElementById('cartToastMsg');
+        if (!toast || !msgEl) return;
+        msgEl.textContent = msg;
+        toast.className   = `cart-toast cart-toast-${type}`;
+        toast.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
 
     // ── INICIALIZAÇÃO ─────────────────────────────────────────────────────────
     async function loadServices() {
@@ -295,9 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Define data mínima como hoje
     dateInput.min = new Date().toISOString().split('T')[0];
-
     loadServices();
     renderClientAppointments();
 });
